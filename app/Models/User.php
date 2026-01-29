@@ -8,11 +8,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
+
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +25,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'bio',
+        'social_links',
+        'current_points',
+        'current_level'
     ];
 
     /**
@@ -47,6 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'social_links' => 'array',
         ];
     }
 
@@ -58,7 +65,28 @@ class User extends Authenticatable
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    // Relación: Un usuario (profesor) crea muchos cursos
+    public function createdCourses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
+    // Relación: Un usuario (estudiante) completa muchas lecciones
+    public function completedLessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_user')
+            ->withPivot('completed_at')
+            ->withTimestamps();
+    }
+
+    // Relación: Gamificación - Medallas ganadas
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class, 'achievement_user')
+            ->withPivot('awarded_at');
     }
 }
