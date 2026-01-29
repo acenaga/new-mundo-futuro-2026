@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -55,6 +58,14 @@ class User extends Authenticatable
             'password' => 'hashed',
             'social_links' => 'array',
         ];
+    }
+
+    // Lógica de acceso al Panel de Filament
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Si el usuario tiene rol Admin, Tutor o Editor, puede entrar.
+        // Los estudiantes (usuarios normales) NO pueden entrar aquí.
+        return $this->hasAnyRole(['admin', 'tutor', 'editor']) && $this->hasVerifiedEmail();
     }
 
     /**
