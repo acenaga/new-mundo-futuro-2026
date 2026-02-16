@@ -9,7 +9,7 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.4.14
+- php - 8.4.16
 - filament/filament (FILAMENT) - v5
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12
@@ -31,6 +31,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - `livewire-development` — Develops reactive Livewire 4 components. Activates when creating, updating, or modifying Livewire components; working with wire:model, wire:click, wire:loading, or any wire: directives; adding real-time updates, loading states, or reactivity; debugging component behavior; writing Livewire tests; or when the user mentions Livewire, component, counter, or reactive UI.
 - `pest-testing` — Tests applications using the Pest 4 PHP framework. Activates when writing tests, creating unit or feature tests, adding assertions, testing Livewire components, browser testing, debugging test failures, working with datasets or mocking; or when the user mentions test, spec, TDD, expects, assertion, coverage, or needs to verify functionality works.
 - `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
+- `developing-with-ai-sdk` — Builds AI agents, generates text and chat responses, produces images, synthesizes audio, transcribes speech, generates vector embeddings, reranks documents, and manages files and vector stores using the Laravel AI SDK (laravel/ai). Supports structured output, streaming, tools, conversation memory, middleware, queueing, broadcasting, and provider failover. Use when building, editing, updating, debugging, or testing any AI functionality, including agents, LLMs, chatbots, text generation, image generation, audio, transcription, embeddings, RAG, similarity search, vector stores, prompting, structured output, or any AI provider (OpenAI, Anthropic, Gemini, Cohere, Groq, xAI, ElevenLabs, Jina, OpenRouter).
 - `developing-with-fortify` — Laravel Fortify headless authentication backend development. Activate when implementing authentication features including login, registration, password reset, email verification, two-factor authentication (2FA/TOTP), profile updates, headless auth, authentication scaffolding, or auth guards in Laravel applications.
 
 ## Conventions
@@ -264,6 +265,148 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - IMPORTANT: Always use `search-docs` tool for version-specific Tailwind CSS documentation and updated code examples. Never rely on training data.
 - IMPORTANT: Activate `tailwindcss-development` every time you're working with a Tailwind CSS or styling-related task.
 
+=== filament/filament rules ===
+
+## Filament
+
+- Filament is used by this application. Follow existing conventions for how and where it's implemented.
+- Filament is a Server-Driven UI (SDUI) framework for Laravel that lets you define user interfaces in PHP using structured configuration objects. Built on Livewire, Alpine.js, and Tailwind CSS.
+- Use the `search-docs` tool for official documentation on Artisan commands, code examples, testing, relationships, and idiomatic practices.
+
+### Artisan
+
+- Use Filament-specific Artisan commands to create files. Find them with `list-artisan-commands` or `php artisan --help`.
+- Inspect required options and always pass `--no-interaction`.
+
+### Patterns
+
+Use static `make()` methods to initialize components. Most configuration methods accept a `Closure` for dynamic values.
+
+Use `Get $get` to read other form field values for conditional logic:
+
+<code-snippet name="Conditional form field" lang="php">
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+
+Select::make('type')
+    ->options(CompanyType::class)
+    ->required()
+    ->live(),
+
+TextInput::make('company_name')
+    ->required()
+    ->visible(fn (Get $get): bool => $get('type') === 'business'),
+
+</code-snippet>
+
+Use `state()` with a `Closure` to compute derived column values:
+
+<code-snippet name="Computed table column" lang="php">
+use Filament\Tables\Columns\TextColumn;
+
+TextColumn::make('full_name')
+    ->state(fn (User $record): string => "{$record->first_name} {$record->last_name}"),
+
+</code-snippet>
+
+Actions encapsulate a button with optional modal form and logic:
+
+<code-snippet name="Action with modal form" lang="php">
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+
+Action::make('updateEmail')
+    ->form([
+        TextInput::make('email')->email()->required(),
+    ])
+    ->action(fn (array $data, User $record): void => $record->update($data)),
+
+</code-snippet>
+
+### Testing
+
+Authenticate before testing panel functionality. Filament uses Livewire, so use `livewire()` or `Livewire::test()`:
+
+<code-snippet name="Filament Table Test" lang="php">
+    livewire(ListUsers::class)
+        ->assertCanSeeTableRecords($users)
+        ->searchTable($users->first()->name)
+        ->assertCanSeeTableRecords($users->take(1))
+        ->assertCanNotSeeTableRecords($users->skip(1));
+
+</code-snippet>
+
+<code-snippet name="Filament Create Resource Test" lang="php">
+    livewire(CreateUser::class)
+        ->fillForm([
+            'name' => 'Test',
+            'email' => 'test@example.com',
+        ])
+        ->call('create')
+        ->assertNotified()
+        ->assertRedirect();
+
+    assertDatabaseHas(User::class, [
+        'name' => 'Test',
+        'email' => 'test@example.com',
+    ]);
+
+</code-snippet>
+
+<code-snippet name="Testing Validation" lang="php">
+    livewire(CreateUser::class)
+        ->fillForm([
+            'name' => null,
+            'email' => 'invalid-email',
+        ])
+        ->call('create')
+        ->assertHasFormErrors([
+            'name' => 'required',
+            'email' => 'email',
+        ])
+        ->assertNotNotified();
+
+</code-snippet>
+
+<code-snippet name="Calling Actions" lang="php">
+    use Filament\Actions\DeleteAction;
+    use Filament\Actions\Testing\TestAction;
+
+    livewire(EditUser::class, ['record' => $user->id])
+        ->callAction(DeleteAction::class)
+        ->assertNotified()
+        ->assertRedirect();
+
+    livewire(ListUsers::class)
+        ->callAction(TestAction::make('promote')->table($user), [
+            'role' => 'admin',
+        ])
+        ->assertNotified();
+
+</code-snippet>
+
+### Common Mistakes
+
+**Commonly Incorrect Namespaces:**
+- Form fields (TextInput, Select, etc.): `Filament\Forms\Components\`
+- Infolist entries (for read-only views) (TextEntry, IconEntry, etc.): `Filament\Infolists\Components\`
+- Layout components (Grid, Section, Fieldset, Tabs, Wizard, etc.): `Filament\Schemas\Components\`
+- Schema utilities (Get, Set, etc.): `Filament\Schemas\Components\Utilities\`
+- Actions: `Filament\Actions\` (no `Filament\Tables\Actions\` etc.)
+- Icons: `Filament\Support\Icons\Heroicon` enum (e.g., `Heroicon::PencilSquare`)
+
+**Recent breaking changes to Filament:**
+- File visibility is `private` by default. Use `->visibility('public')` for public access.
+- `Grid`, `Section`, and `Fieldset` no longer span all columns by default.
+
+=== laravel/ai rules ===
+
+## Laravel AI SDK
+
+- This application uses the Laravel AI SDK (`laravel/ai`) for all AI functionality.
+- Activate the `developing-with-ai-sdk` skill when building, editing, updating, debugging, or testing AI agents, text generation, chat, streaming, structured output, tools, image generation, audio, transcription, embeddings, reranking, vector stores, files, conversation memory, or any AI provider integration (OpenAI, Anthropic, Gemini, Cohere, Groq, xAI, ElevenLabs, Jina, OpenRouter).
+
 === laravel/fortify rules ===
 
 # Laravel Fortify
@@ -271,4 +414,462 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Fortify is a headless authentication backend that provides authentication routes and controllers for Laravel applications.
 - IMPORTANT: Always use the `search-docs` tool for detailed Laravel Fortify patterns and documentation.
 - IMPORTANT: Activate `developing-with-fortify` skill when working with Fortify authentication features.
+
+=== neuron-core/neuron-laravel rules ===
+
+## Neuron AI
+
+Neuron AI is a PHP Agentic framework for creating AI agents with features like chat history, tool integration, RAG (Retrieval Augmented Generation), structured output, and workflow orchestration. The codebase follows PSR-12 standards with strict typing and modern PHP 8.1+ features.
+
+### Core Components
+
+- `Agent` (NeurnoAI\Agent) - Provides chat, streaming, and structured output capabilities
+- `RAG` (NeurnoAI\RAG\RAG) - Extends Agent with vector search and document retrieval capabilities
+- `Workflow` (NeuronAI\Workflow\Workflow) - Provides event-driven node execution, persistence, streaming, human-in-the-loop interruptions
+
+## Available Artisan Commands
+
+You can use the following artisan commands to generate boilerplate code for AI agents, RAG, and workflows:
+
+```
+php artisan neuron:agent <name>
+php artisan neuron:rag <name>
+php artisan neuron:tool <name>
+php artisan neuron:workflow <name>
+php artisan neuron:node <name>
+```
+
+## Agent - NeuronAI\Agent
+
+Create an AI agent with:
+
+```
+php artisan neuron:agent MyAgent
+```
+
+Here is an example of an agent implementation:
+
+```php
+namespace App\Neuron;
+
+use NeuronAI\Agent;
+use NeuronAI\SystemPrompt;
+use NeuronAI\Providers\AIProviderInterface;
+
+class MyAgent extends Agent
+{
+    protected function provider(): AIProviderInterface
+    {
+        // return an instance of Anthropic, OpenAI, Gemini, Ollama, etc...
+        return new Anthropic(
+            key: config('neuron.anthropic.key'),
+            model: config('neuron.anthropic.model'),
+        );
+    }
+    
+    public function instructions(): string
+    {
+        return (string) new SystemPrompt(
+            background: ["You are a friendly AI Agent created with Neuron framework."],
+        );
+    }
+    
+    protected function tools(): array
+    {
+        return [
+            // Add your tools here
+        ];
+    }
+}
+```
+
+### Chat with the Agent
+
+```php
+use App\Neuron\MyAgent;
+use NeuronAI\Chat\Messages\UserMessage;
+
+/** @var \NeuronAI\Chat\Messages\AssistantMessage $response */
+$response = MyAgent::make()->chat(new UserMessage("Hello!"));
+
+echo $response->getContent();
+```
+
+## AI Providers
+
+Neuron AI supports communication to multiple LLM services. All providers implement `NeuronAI\Providers\AIProviderInterface`.
+
+Supported:
+- NeuronAI\Providers\Anthropic\Anthropic
+- NeuronAI\Providers\OpenAI\OpenAI
+- NeuronAI\Providers\OpenAI\Responses\OpenAIResponses
+- NeuronAI\Providers\Gemini\Gemini
+- NeuronAI\Providers\Ollama\Ollama
+- NeuronAI\Providers\HuggingFace\HuggingFace
+- NeuronAI\Providers\Mistral\Mistral
+- NeuronAI\Providers\XAI\Grok
+- NeuronAI\Providers\Deepseek\Deepseek
+- NeuronAI\Providers\AWS\BedrockRuntime
+
+## Chat History
+
+Neuron AI offers a pluggable memory system you can attach to the agent to manage the persistence of the chat history.
+
+```php
+namespace App\Neuron;
+
+use NeuronAI\Agent;
+use NeuronAI\SystemPrompt;
+use NeuronAI\Providers\AIProviderInterface;
+
+class MyAgent extends Agent
+{
+    protected function provider(): AIProviderInterface
+    {
+        ...
+    }
+    
+    public function instructions(): string
+    {
+        ...
+    }
+    
+    protected function tools(): array
+    {
+        ...
+    }
+    
+    protected function chatHistory(): ChatHistoryInterface
+    {
+        return new InMemoryChatHistory();
+    }
+}
+```
+
+**Available Chat History Implementations**:
+
+- InMemory: NeuronAI\Chat\History\InMemoryChatHistory
+- File: NeuronAI\Chat\History\FileChatHistory
+- SQL database: NeuronAI\Chat\History\SQLChatHistory
+- Eloquent ORM: NeuronAI\Chat\History\EloquentChatHistory
+
+### Eloquent Chat History
+
+This package provides an `EloquentChatHistory` implementation that can be used to persist chat history in a database using Eloquent models.
+
+First, you need to run the migration to create the necessary tables:
+
+```
+php artisan migrate --tag=neuron-migrations
+```
+
+You have to create a model that represents the table created, mapping a message in the database. Usually, it's `ChatMessage` model:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ChatMessage extends Model
+{
+    protected $fillable = [
+        'thread_id', 'role', 'content', 'meta'
+    ];
+    
+    protected $casts = [
+        'content' => 'array', 
+        'meta' => 'array'
+    ];
+    
+    /**
+     * The conversation that owns the chat message.
+     *
+     * @return BelongsTo<Conversation, $this>
+     */
+    public function conversation(): BelongsTo
+    {
+        return $this->belongsTo(Conversation::class, 'thread_id');
+    }
+}
+```
+
+The most important architectural decision is about the field `thread_id`. It's used to link chat messages to another entity, 
+it could be directly related to a user, a company, or a project. If you want to allow an entity to have multiple conversations, you can use 
+an intermediate model like `Conversation` that will hold the `thread_id` field. So an entity can have multiple conversations, and a conversation can handle the messages. 
+You have to figure out how you want to design the system and what's the best approach for your use case.
+
+## Structured Output
+
+The schema that Neuron validates against is defined by PHP type hints. Basically, you have to define a class with 
+strictly typed properties, using the `NeuronAI\StructuredOutput\SchemaProperty` attribute to define the property schema information.
+
+```php
+namespace App\Neuron\Output;
+
+use NeuronAI\StructuredOutput\SchemaProperty;
+
+class Person 
+{
+    #[SchemaProperty(description: 'The user name.', required: true)]
+    public string $name;
+    
+    #[SchemaProperty(description: 'What the user love to eat.', required: false)]
+    public string $preference;
+}
+```
+
+You need to run the agent invoking the `structured` method that returns an object instance filled with appropriate data:
+
+```php
+use App\Neuron\Output\Person;
+use NeuronAI\Chat\Messages\UserMessage;
+
+// Talk to the agent requiring the structured output
+$person = MyAgent::make()->structured(
+    new UserMessage("I'm John and I like pizza!"),
+    Person::class
+);
+
+echo $person->name.' like '.$person->preference;
+// John like pizza
+```
+
+### Validation Rules
+
+You can enforce validation rules on data extraction by using a set of validation attributes on the DTO class properties. 
+Here is an example of the "NotBlank" validation rule:
+
+```php
+namespace App\Neuron\Output;
+
+use NeuronAI\StructuredOutput\SchemaProperty;
+use NeuronAI\StructuredOutput\Validation\Rules\NotBlank;
+
+class Person 
+{
+    #[SchemaProperty(...)]
+    #[NotBlank]
+    public string $name;
+}
+```
+
+**Available Validation Rules**:
+#[NotBlank]
+#[Lenght(min: 1, max: 10)]
+#[WordsCount(min: 1, max: 10)]
+#[Count(min: 1, max: 3)]
+#[EqualTo(reference: 'Rome')] 
+#[NotEqualTo(reference: 'Rome')]
+#[GreaterThan(reference: 17)]
+#[GreaterThanEqual(reference: 17)]
+#[LowerThan(reference: 50)]
+#[LowerThanEqual(reference: 50)]
+#[OutOfRange(min: 18, max: 35)]
+#[IsFalse]
+#[IsTrue]
+#[IsNotNull]
+#[IsNull]
+#[Json]
+#[Url]
+#[Email]
+#[IpAddress]
+
+### Array Validation
+
+The property under validation must be an array that contains all of the given types of objects. **Notice that you also need 
+to add the doc-block in order to make the agent able to instance the correct class**. Use the full class namespace in the doc-block.
+
+```php
+namespace App\Neuron\Output;
+
+use NeuronAI\StructuredOutput\Validation\Rules\ArrayOf;
+
+class Person
+{
+    /**
+     * @var \App\Neuron\Output\Tag[]
+     */
+    #[ArrayOf(Tag::class)]
+    public array $tags;
+}
+```
+
+## Tool System
+
+Extensible tool framework for agent capabilities. 
+- Individual tools implement `NeuronAI\Tools\ToolInterface`
+- Toolkits group related tools (NeuronAI\Tools\Toolkits\ToolkitInterface)
+- Built-in toolkits: Calculator, MySQL, PostgreSQL, Tavily, Jina, Supadata 
+
+### MCPConnector
+
+`NeuronAI\MCP\MCPConnector` to connect tools to the agent provided by external MCP servers.
+
+```php
+use NeuronAI\MCP\McpConnector;
+
+class MyAgent extends Agent 
+{
+    // Other agent methods (provider, instructions, chatHistory)...
+    
+    protected function tools(): array
+    {
+        return [
+            ...McpConnector::make([
+                'url' => 'https://mcp.example.com',
+                'token' => 'BEARER_TOKEN',
+                'timeout' => 30,
+                'headers' => [
+                    //'x-custom-header' => 'value'
+                ]
+            ])->tools(),
+        ];
+    }
+}
+```
+
+## RAG - NeuronAI\RAG\RAG
+
+Neuron has a dedicated component for RAG (Retrieval Augmented Generation) to implement documents retrieval from a 
+vector store and augment them with contextual information. It extends the Agent component with a couple of methods to 
+specify the connected vector store and the embeddings provider.
+
+```php
+namespace App\Neuron;
+
+use NeuronAI\Providers\AIProviderInterface;
+use NeuronAI\Providers\Anthropic\Anthropic;
+use NeuronAI\RAG\Embeddings\EmbeddingsProviderInterface;
+use NeuronAI\RAG\Embeddings\OpenAIEmbeddingsProvider;
+use NeuronAI\RAG\RAG;
+use NeuronAI\RAG\VectorStore\FileVectorStore;
+use NeuronAI\RAG\VectorStore\VectorStoreInterface;
+
+class MyChatBot extends RAG
+{
+    // Other agent methods (provider, instructions, tools, chatHistory)...
+    
+    protected function embeddings(): EmbeddingsProviderInterface
+    {
+        return new OpenAIEmbeddingsProvider(
+            key: 'OPENAI_API_KEY',
+            model: 'OPENAI_MODEL'
+        );
+    }
+    
+    protected function vectorStore(): VectorStoreInterface
+    {
+        return new FileVectorStore(
+            directory: __DIR__,
+            name: 'demo'
+        );
+    }
+}
+```
+
+**Available Vector Stores**:
+- NeuronAI\RAG\VectorStore\MemoryVectorStore
+- NeuronAI\RAG\VectorStore\FileVectorStore
+- NeuronAI\RAG\VectorStore\PineconeVectorStore
+- NeuronAI\RAG\VectorStore\ChromaVectorStore
+- NeuronAI\RAG\VectorStore\QdrantVectorStore
+- NeuronAI\RAG\VectorStore\MeilisearchVectorStore
+- NeuronAI\RAG\VectorStore\TypesenseVectorStore
+- NeuronAI\RAG\VectorStore\ElasticsearchVectorStore
+
+**Available Embeddings Providers**:
+- NeuronAI\RAG\Embeddings\AWSBedrockEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\GeminiEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\MistralEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\OllamaEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\OpenAIEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\OpeAILikeEmbeddingsProvider
+- NeuronAI\RAG\Embeddings\VoyageEmbeddingsProvider
+
+## Workflow - NeuronAI\Workflow\Workflow
+
+Neuron AI provides a powerful workflow orchestration system that allows you to build complex agentic workflow with a simple 
+Event-Driven Architecture:
+
+1. Each node receives a typed Event
+2. Node processes the event and returns a new Event (or `NeuronAI\Workflow\Events\StopEvent` to complete)
+3. The workflow routes the returned event to the appropriate next node
+4. This continues until a StopEvent is returned
+
+This design promotes loose coupling and makes workflows highly composable and testable.
+
+Key methods:
+- `start(): NeuronAI\Workflow\WorkflowHandler` - Initialize or resume workflow
+- `addNode(NodeInterface $node): Workflow` - Register a node
+- `addNodes(array $nodes): Workflow` - Register multiple nodes
+- `setPersistence(PersistenceInterface $persistence, string $workflowId)` - Configure persistence
+- `export(): string` - Export workflow structure to diagram format like Marmeid
+
+### Node-Event Mapping
+
+Nodes are automatically mapped to events through reflection:
+
+```php
+class InitialNode extends Node
+{
+    // The first __invoke argument determines which event this node handles
+    public function __invoke(StartEvent $event, WorkflowState $state): ProcessEvent
+    {
+        // The return event determines the next node to execute
+        return new ProcessEvent($validatedData);
+    }
+}
+```
+
+The workflow introspects the node class structure to build an event→node routing table.
+
+### Create and run a workflow
+
+1) Create nodes with:
+
+```
+php artisan neuron:node InitialNode
+php artisan neuron:node NodeTwo
+```
+
+Nodes are simple classes, so you can eventually add constructor arguments if needed.
+
+2) Create a workflow with:
+
+```
+php artisan neuron:workflow MyWorkflow
+```
+
+3) Add nodes to the workflow in the `nodes()` method:
+
+```php
+namespace App\Neuron\Workflows;
+
+use NeuronAI\Workflow\Node;
+use NeuronAI\Workflow\Workflow;
+
+class MyWorkflow extends Workflow
+{
+    /**
+     * @return Node[]
+     */
+    protected function nodes(): array
+    {
+        return [
+            new InitialNode(),
+            new NodeTwo(),
+        ];
+    }
+}
+```
+
+4) Execute the workflow and get the result:
+
+```php
+use NeuronAI\Workflow\Workflow;
+
+$handler = Workflow::make()->start();
+
+$result = $handler->getResult();
+```
 </laravel-boost-guidelines>

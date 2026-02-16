@@ -1,19 +1,19 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "/Users/acenaga/Library/Application Support/Herd/bin/php84",
+            "command": "C:\\Users\\amari\\.config\\herd\\bin\\php84\\php.exe",
             "args": [
-                "/Users/acenaga/Herd/new-mundo-futuro/artisan",
+                "C:\\laragon\\www\\new-mundo-futuro-2026\\artisan",
                 "boost:mcp"
             ]
         },
         "herd": {
-            "command": "/Users/acenaga/Library/Application Support/Herd/bin/php84",
+            "command": "C:\\Users\\amari\\.config\\herd\\bin\\php84\\php.exe",
             "args": [
-                "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+                "C:/Users/amari/.config/herd/bin/herd-mcp.phar"
             ],
             "env": {
-                "SITE_PATH": "/Users/acenaga/Herd/new-mundo-futuro"
+                "SITE_PATH": "C:\\laragon\\www\\new-mundo-futuro-2026"
             }
         }
     }

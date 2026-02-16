@@ -15,10 +15,10 @@
             "enabled": true,
             "command": [
                 "php",
-                "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+                "C:/Users/amari/.config/herd/bin/herd-mcp.phar"
             ],
             "environment": {
-                "SITE_PATH": "/Users/acenaga/Herd/new-mundo-futuro"
+                "SITE_PATH": "C:\\laragon\\www\\new-mundo-futuro-2026"
             }
         }
     }
