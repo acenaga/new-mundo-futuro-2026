@@ -25,7 +25,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -39,16 +38,6 @@ class UserResource extends Resource
     protected static ?string $navigationLabel = 'Usuarios';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Sistema';
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return $record->id !== auth()->id();
-    }
 
     public static function form(Schema $schema): Schema
     {
