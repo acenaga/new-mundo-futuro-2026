@@ -21,3 +21,17 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/.claude
+settings.local.json
+opencode.json
+boost.json
+GEMINI.md
+CLAUDE.md
+AGENTS.md
+.mcp.json
+.junie
+.github
+.gemini
+.cursor
+.nvmrc
+tmpclaude-*-cwd
