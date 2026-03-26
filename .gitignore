@@ -33,5 +33,7 @@ AGENTS.md
 .github
 .gemini
 .cursor
+.agents
+.opencode
 .nvmrc
 tmpclaude-*-cwd
