@@ -6,17 +6,17 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "bezhansalleh/filament-shield": "^4.1",
         "filament/filament": "^5.3.2",
-        "laravel/ai": "^0.1.5",
+        "laravel/ai": "^0.4",
         "laravel/fortify": "^1.36.1",
-        "laravel/framework": "^12.54.1",
-        "laravel/tinker": "^2.11.1",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
         "livewire/flux": "^2.13.0",
         "livewire/livewire": "^4.2.1",
-        "neuron-core/neuron-ai": "^2.13.0",
-        "neuron-core/neuron-laravel": "^0.3.4",
+        "neuron-core/neuron-ai": "^3.0",
+        "neuron-core/neuron-laravel": "^1.0",
         "spatie/laravel-permission": "^6.24.1"
     },
     "require-dev": {
