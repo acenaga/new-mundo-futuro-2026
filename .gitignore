@@ -30,7 +30,8 @@ CLAUDE.md
 AGENTS.md
 .mcp.json
 .junie
-.github
+.github/skills/
+.github/copilot-instructions.md
 .gemini
 .cursor
 .agents
