@@ -10,6 +10,44 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* === Galactic Editorial — Surface Layers === */
+    --color-surface: #12121d;
+    --color-surface-container-lowest: #0d0d18;
+    --color-surface-container-low: #1b1b25;
+    --color-surface-container: #21212d;
+    --color-surface-container-high: #292934;
+    --color-surface-container-highest: #313140;
+    --color-surface-bright: #2e2e3d;
+
+    /* === Primary (deep cosmic blue) === */
+    --color-primary: #110090;
+    --color-primary-container: #110090;
+    --color-on-primary: #c1c1ff;
+
+    /* === Secondary (nebula purple) === */
+    --color-secondary: #4c2e84;
+    --color-secondary-container: #3b2068;
+    --color-on-secondary: #d3bbff;
+
+    /* === Tertiary (sun yellow — CTAs only) === */
+    --color-tertiary: #f4bf27;
+    --color-tertiary-container: #342600;
+    --color-on-tertiary: #342600;
+    --color-on-tertiary-container: #b38900;
+
+    /* === Text / Ink === */
+    --color-on-surface: #e2e2f0;
+    --color-on-surface-variant: #9999b3;
+    --color-outline-variant: #3a3a55;
+
+    /* === Light mode surfaces === */
+    --color-surface-light: #f4f4fb;
+    --color-surface-container-low-light: #eaeaf5;
+    --color-on-surface-light: #12121d;
+    --color-on-surface-variant-light: #4a4a6a;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -37,13 +75,73 @@
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+/* === Galactic Editorial — Hero Section (dark/light via .dark class, not Alpine) === */
+@layer components {
+    /* Dark mode (default) */
+    .hero-section {
+        background: linear-gradient(135deg, #110090 0%, #1a0d6e 40%, #12121d 100%);
+    }
+    .hero-blob-left {
+        background-color: color-mix(in srgb, #4c2e84 30%, transparent);
+    }
+    .hero-blob-right {
+        background-color: color-mix(in srgb, #110090 40%, transparent);
+    }
+
+    /* Body */
+    .public-body {
+        background-color: #12121d;
+        color: #e2e2f0;
+    }
+    html:not(.dark) .public-body {
+        background-color: #f4f4fb;
+        color: #12121d;
+    }
+
+    /* Light mode */
+    html:not(.dark) .hero-section {
+        background: linear-gradient(135deg, #e8e8ff 0%, #f0eaff 40%, #f4f4fb 100%);
+    }
+    html:not(.dark) .hero-blob-left {
+        background-color: color-mix(in srgb, #c1c1ff 40%, transparent);
+    }
+    html:not(.dark) .hero-blob-right {
+        background-color: color-mix(in srgb, #d3bbff 30%, transparent);
+    }
+}
+
+/* === Galactic Editorial — Public Site Utilities === */
+@layer utilities {
+    .font-display {
+        font-family: var(--font-display);
+    }
+
+    .font-body {
+        font-family: var(--font-body);
+    }
+
+    /* Ghost border fallback (outline-variant at 15% opacity) */
+    .border-ghost {
+        border: 1px solid color-mix(in srgb, var(--color-outline-variant) 15%, transparent);
+    }
+
+    /* Hex clip — top-right corner accent on featured cards */
+    .clip-hex-corner {
+        clip-path: polygon(0 0, calc(100% - 2rem) 0, 100% 2rem, 100% 100%, 0 100%);
+    }
+
+    /* Ambient float shadow (tinted with on-primary, not pure black) */
+    .shadow-ambient {
+        box-shadow: 0 0 40px 0 color-mix(in srgb, #1c1497 10%, transparent);
     }
 }
 
