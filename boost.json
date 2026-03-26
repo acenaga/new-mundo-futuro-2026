@@ -19,11 +19,18 @@
     ],
     "sail": false,
     "skills": [
+        "laravel-best-practices",
         "fluxui-development",
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
-        "developing-with-ai-sdk",
-        "fortify-development"
+        "ai-sdk-development",
+        "fortify-development",
+        "neuron-agent-builder",
+        "neuron-debugger",
+        "neuron-evaluation-engineer",
+        "neuron-rag-specialist",
+        "neuron-tool-creator",
+        "neuron-workflow-architect"
     ]
 }
