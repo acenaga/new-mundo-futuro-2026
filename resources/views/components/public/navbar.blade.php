@@ -10,7 +10,7 @@
 
         {{-- Logo --}}
         <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-3" aria-label="Mundo Futuro">
-            <img src="{{ asset('assets/img/logo-wb.png') }}" alt="Mundo Futuro" class="h-9 w-auto">
+            <img :src="isDark ? '{{ asset('assets/img/logo-dark.svg') }}' : '{{ asset('assets/img/logo.svg') }}'" alt="Mundo Futuro" class="h-9 w-auto">
             <span class="font-display hidden text-base font-bold tracking-tight sm:block"
                 :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
                 MUNDO FUTURO
@@ -22,8 +22,8 @@
             @php
                 $links = [
                     ['label' => 'Inicio', 'route' => 'home', 'disabled' => false],
-                    ['label' => 'Publicaciones', 'route' => null, 'disabled' => true],
-                    ['label' => 'Tutoriales', 'route' => null, 'disabled' => true],
+                    ['label' => 'Publicaciones', 'route' => 'publicaciones', 'disabled' => false],
+                    ['label' => 'Tutoriales', 'route' => 'tutoriales', 'disabled' => false],
                     ['label' => 'Cursos', 'route' => null, 'disabled' => true],
                     ['label' => 'Comunidad', 'route' => null, 'disabled' => true],
                 ];
@@ -117,7 +117,7 @@
                     Inicio
                 </a>
             </li>
-            @foreach (['Publicaciones', 'Tutoriales', 'Cursos', 'Comunidad'] as $item)
+            @foreach (['Cursos', 'Comunidad'] as $item)
                 <li>
                     <span class="block cursor-not-allowed rounded-md px-3 py-2 text-sm font-medium opacity-40"
                         :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">

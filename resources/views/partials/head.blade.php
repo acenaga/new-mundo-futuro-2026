@@ -1,4 +1,14 @@
 <meta charset="utf-8" />
+<script>
+    (function () {
+        var s = localStorage.getItem('flux_appearance') || localStorage.getItem('appearance');
+        if (s === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    }());
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <title>{{ $title ?? config('app.name') }}</title>

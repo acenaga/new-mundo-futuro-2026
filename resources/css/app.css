@@ -89,6 +89,7 @@
     /* Dark mode (default) */
     .hero-section {
         background: linear-gradient(135deg, #110090 0%, #1a0d6e 40%, #12121d 100%);
+        transition: background-color 0.3s ease;
     }
     .hero-blob-left {
         background-color: color-mix(in srgb, #4c2e84 30%, transparent);
