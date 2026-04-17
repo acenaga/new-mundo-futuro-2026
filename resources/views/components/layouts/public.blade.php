@@ -22,12 +22,12 @@
 
     <script>
         function themeManager() {
+            const stored = localStorage.getItem('flux_appearance') ?? localStorage.getItem('appearance');
             return {
-                isDark: true,
+                isDark: stored !== 'light',
                 init() {
-                    // Use same key as Flux so theme stays in sync across public/app
-                    const stored = localStorage.getItem('flux_appearance') ?? localStorage.getItem('appearance');
-                    this.isDark = stored !== 'light';
+                    // Apply initial state — :class on <html> root is unreliable in Alpine
+                    document.documentElement.classList.toggle('dark', this.isDark);
                     this.$watch('isDark', val => {
                         document.documentElement.classList.toggle('dark', val);
                         localStorage.setItem('flux_appearance', val ? 'dark' : 'light');

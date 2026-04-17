@@ -7,7 +7,7 @@ use App\Models\Tag;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
-class TutorialesController extends Controller
+class TutorialController extends Controller
 {
     public function index(Request $request): View
     {

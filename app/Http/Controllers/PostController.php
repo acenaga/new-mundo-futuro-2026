@@ -8,7 +8,7 @@ use App\Models\Tag;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
-class PublicacionesController extends Controller
+class PostController extends Controller
 {
     public function index(Request $request): View
     {
