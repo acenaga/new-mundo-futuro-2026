@@ -1,4 +1,8 @@
-<x-layouts.public>
+<x-layouts.public
+    title="Tutoriales — {{ config('app.name') }}"
+    description="Aprende desarrollo web avanzado paso a paso con tutoriales prácticos en vídeo sobre las tecnologías más demandadas."
+    :canonical="route('tutoriales')"
+>
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HEADER

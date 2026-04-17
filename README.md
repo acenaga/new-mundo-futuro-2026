@@ -87,12 +87,136 @@ resources/views/
 │       ├── navbar.blade.php       # Navbar sticky con toggle de tema
 │       └── footer.blade.php       # Footer con links y redes
 ├── partials/
-│   └── head.blade.php             # Meta tags, fuentes, Vite assets
+│   └── head.blade.php             # Meta tags SEO, OG, Twitter Cards, fuentes, Vite
 ├── welcome.blade.php              # Home page
+├── sitemap.blade.php              # Plantilla XML del sitemap dinámico
 ├── publicaciones/
-│   └── index.blade.php            # Listado de publicaciones
+│   ├── index.blade.php            # Listado de publicaciones
+│   └── show.blade.php             # Detalle de publicación (con JSON-LD)
 └── tutoriales/
-    └── index.blade.php            # Listado de tutoriales
+    ├── index.blade.php            # Listado de tutoriales
+    └── show.blade.php             # Detalle de tutorial (con JSON-LD)
+```
+
+---
+
+## SEO dinámico
+
+El sistema de SEO está construido sobre `partials/head.blade.php` y el layout `public.blade.php`. Todas las páginas del sitio generan automáticamente `<title>`, meta description, etiquetas Open Graph, Twitter Cards y URL canónica.
+
+### Cómo funciona
+
+**1. El layout declara las props SEO**
+
+`public.blade.php` acepta cinco props opcionales:
+
+```blade
+@props(['title' => null, 'description' => null, 'ogImage' => null, 'ogType' => 'website', 'canonical' => null])
+```
+
+Cada página pasa sus propios valores al instanciar el layout:
+
+```blade
+<x-layouts.public
+    :title="$post->title . ' — ' . config('app.name')"
+    :description="$post->excerpt"
+    :ogImage="$post->cover_image_path ? Storage::url($post->cover_image_path) : null"
+    ogType="article"
+    :canonical="route('tutoriales.show', $post)"
+>
+```
+
+**2. El partial `head.blade.php` resuelve los valores con fallbacks**
+
+```php
+$seoTitle       = $title       ?? config('app.name');
+$seoDescription = strip_tags($description ?? 'Descripción por defecto...');
+$seoCanonical   = $canonical   ?? url()->current();
+$seoOgType      = $ogType      ?? 'website';
+$seoOgImage     = $ogImage     ?? asset('apple-touch-icon.png');
+$seoLocale      = str_replace('_', '-', app()->getLocale());
+```
+
+Si una página no pasa ningún valor, el head usa fallbacks inteligentes: la URL canónica es `url()->current()`, la imagen es el `apple-touch-icon.png` del proyecto, y el tipo OG es `website`.
+
+**3. Tags generados por cada tipo de página**
+
+| Tag | Home | Index | Show (artículos) |
+|---|---|---|---|
+| `<title>` | ✓ personalizado | ✓ personalizado | ✓ con nombre de la publicación |
+| `<meta description>` | ✓ | ✓ | ✓ desde `excerpt` |
+| `<link rel="canonical">` | ✓ | ✓ | ✓ con slug de la URL |
+| `og:type` | `website` | `website` | `article` |
+| `og:title` / `og:description` | ✓ | ✓ | ✓ |
+| `og:image` | logo del proyecto | logo del proyecto | ✓ desde `cover_image_path` |
+| `twitter:card` | `summary_large_image` | `summary_large_image` | `summary_large_image` |
+| JSON-LD (`Article` / `TechArticle`) | — | — | ✓ inyectado en `<head>` |
+
+**4. JSON-LD en páginas de detalle**
+
+Las páginas `show` inyectan datos estructurados en el `<head>` usando `@push('head')`:
+
+```blade
+@push('head')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ $post->title }}",
+    "description": "{{ $post->excerpt }}",
+    "datePublished": "{{ $post->published_at?->toIso8601String() }}",
+    "dateModified": "{{ $post->updated_at->toIso8601String() }}",
+    "author": { "@type": "Person", "name": "{{ $post->author?->name }}" },
+    "publisher": { "@type": "Organization", "name": "{{ config('app.name') }}", "url": "{{ url('/') }}" }
+}
+</script>
+@endpush
+```
+
+El layout tiene `@stack('head')` justo antes de `</head>`, por lo que este bloque siempre se coloca en la ubicación correcta.
+
+**5. Sitemap dinámico (`/sitemap.xml`)**
+
+`SitemapController` consulta todos los `Post` publicados, los separa en tutoriales y publicaciones, y renderiza una vista XML:
+
+```php
+$posts     = Post::where('status', PostStatus::Published)->with('category')->get();
+$tutorials = $posts->filter(fn ($p) => $p->category?->slug === 'tutorials');
+$publicaciones = $posts->filter(fn ($p) => $p->category?->slug !== 'tutorials');
+
+return response()->view('sitemap', compact('tutorials', 'publicaciones'))
+    ->header('Content-Type', 'application/xml');
+```
+
+El sitemap se actualiza en tiempo real con cada nueva publicación, sin necesidad de regeneración manual.
+
+### Archivos implicados en el SEO
+
+| Archivo | Rol |
+|---|---|
+| `resources/views/partials/head.blade.php` | Genera todos los meta tags con fallbacks |
+| `resources/views/components/layouts/public.blade.php` | Declara `@props` SEO y `@stack('head')` |
+| `resources/views/welcome.blade.php` | Pasa title y description de la home |
+| `resources/views/publicaciones/index.blade.php` | Pasa title y description del índice |
+| `resources/views/publicaciones/show.blade.php` | Pasa SEO completo + JSON-LD `Article` |
+| `resources/views/tutoriales/index.blade.php` | Pasa title y description del índice |
+| `resources/views/tutoriales/show.blade.php` | Pasa SEO completo + JSON-LD `TechArticle` |
+| `resources/views/sitemap.blade.php` | Plantilla XML del sitemap |
+| `app/Http/Controllers/SitemapController.php` | Genera el sitemap dinámico |
+| `public/robots.txt` | Directivas para crawlers |
+
+### Configuración en producción
+
+Antes de desplegar, asegúrate de que `APP_URL` en `.env` apunte al dominio real:
+
+```env
+APP_URL=https://mundomuturo.com
+```
+
+El sitemap y las URLs canónicas se generan a partir de esta variable. Añade también la línea `Sitemap:` al `public/robots.txt`:
+
+```
+Sitemap: https://mundofuturo.com/sitemap.xml
 ```
 
 ---
@@ -103,7 +227,10 @@ resources/views/
 |---|---|---|---|
 | GET | `/` | `home` | Página de inicio |
 | GET | `/publicaciones` | `publicaciones` | Todas las publicaciones (excepto tutoriales) |
+| GET | `/publicaciones/{slug}` | `publicaciones.show` | Detalle de una publicación |
 | GET | `/tutoriales` | `tutoriales` | Solo tutoriales |
+| GET | `/tutoriales/{slug}` | `tutoriales.show` | Detalle de un tutorial |
+| GET | `/sitemap.xml` | `sitemap` | Sitemap XML dinámico |
 
 ### Parámetros de filtro
 

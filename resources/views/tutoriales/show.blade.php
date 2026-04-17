@@ -1,4 +1,10 @@
-<x-layouts.public :title="$post->title . ' — ' . config('app.name')">
+<x-layouts.public
+    :title="$post->title . ' — ' . config('app.name')"
+    :description="$post->excerpt"
+    :ogImage="$post->cover_image_path ? Storage::url($post->cover_image_path) : null"
+    ogType="article"
+    :canonical="route('tutoriales.show', $post)"
+>
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HERO
@@ -248,5 +254,29 @@
             </div>
         </div>
     @endif
+
+    @push('head')
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "{{ $post->title }}",
+        "description": "{{ $post->excerpt }}",
+        "datePublished": "{{ $post->published_at?->toIso8601String() }}",
+        "dateModified": "{{ $post->updated_at->toIso8601String() }}",
+        "author": {
+            "@type": "Person",
+            "name": "{{ $post->author?->name ?? config('app.name') }}"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "{{ config('app.name') }}",
+            "url": "{{ url('/') }}"
+        },
+        "url": "{{ route('tutoriales.show', $post) }}"@if($post->cover_image_path),
+        "image": "{{ Storage::url($post->cover_image_path) }}"@endif
+    }
+    </script>
+    @endpush
 
 </x-layouts.public>
