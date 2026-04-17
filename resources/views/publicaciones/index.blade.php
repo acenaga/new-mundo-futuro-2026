@@ -167,7 +167,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <a href="#"
+                            <a href="{{ route('publicaciones.show', $featured) }}"
                                 class="font-display rounded-lg bg-[#f4bf27] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#342600] transition-all hover:brightness-110">
                                 Leer artículo →
                             </a>
@@ -269,7 +269,7 @@
                                             {{ $post->published_at?->translatedFormat('d M, Y') ?? '—' }}
                                         </span>
                                     </div>
-                                    <a href="#"
+                                    <a href="{{ route('publicaciones.show', $post) }}"
                                         class="font-display text-xs font-semibold transition-colors"
                                         :class="isDark ? 'text-[#c1c1ff] hover:text-[#f4bf27]' : 'text-[#110090] hover:text-[#4c2e84]'">
                                         Leer →

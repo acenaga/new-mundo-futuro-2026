@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Post extends Model
 {
-    /** @use HasFactory<\Database\Factories\PostFactory> */
+    /** @use HasFactory<PostFactory> */
     use HasFactory;
 
     protected $fillable = [
         'user_id', 'category_id', 'title', 'slug', 'excerpt',
-        'body', 'cover_image_path', 'status', 'published_at', 'allow_comments',
+        'body', 'cover_image_path', 'video_url', 'status', 'published_at', 'allow_comments',
     ];
 
     protected function casts(): array

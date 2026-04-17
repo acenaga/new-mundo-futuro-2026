@@ -71,7 +71,16 @@
 
         @if ($tutorials->isNotEmpty())
 
-            @php $featured = $tutorials->first(); $rest = $tutorials->slice(1); @endphp
+            @php
+                $featured = $tutorials->first();
+                $rest = $tutorials->slice(1);
+
+                $youtubeThumb = function (?string $url): ?string {
+                    if (! $url) { return null; }
+                    preg_match('/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m);
+                    return isset($m[1]) ? 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg' : null;
+                };
+            @endphp
 
             {{-- ── Featured tutorial ──────────────────────────────────── --}}
             <article class="clip-hex-corner relative mb-8 overflow-hidden rounded-xl lg:mb-12"
@@ -123,7 +132,7 @@
                         @endif
 
                         <div class="mt-auto flex items-center gap-4 pt-2">
-                            <a href="#"
+                            <a href="{{ route('tutoriales.show', $featured) }}"
                                 class="font-display flex items-center gap-2 rounded-lg bg-[#f4bf27] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#342600] transition-all hover:brightness-110">
                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5.14v14l11-7-11-7z" />
@@ -134,11 +143,13 @@
                     </div>
 
                     {{-- Thumbnail --}}
-                    <div class="relative flex aspect-video items-center justify-center overflow-hidden lg:col-span-2 lg:aspect-auto lg:self-stretch"
+                    <a href="{{ route('tutoriales.show', $featured) }}"
+                        class="relative flex aspect-video items-center justify-center overflow-hidden lg:col-span-2 lg:aspect-auto lg:self-stretch"
                         :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
-                        @if ($featured->cover_image_path)
-                            <img src="{{ Storage::url($featured->cover_image_path) }}"
-                                alt="{{ $featured->title }}" class="h-full w-full object-cover">
+                        @php $thumb = $youtubeThumb($featured->video_url) ?? ($featured->cover_image_path ? Storage::url($featured->cover_image_path) : null); @endphp
+                        @if ($thumb)
+                            <img src="{{ $thumb }}" alt="{{ $featured->title }}"
+                                class="h-full w-full object-cover transition-transform duration-500 hover:scale-105">
                         @else
                             <svg class="h-20 w-20 opacity-10"
                                 :class="isDark ? 'text-[#c1c1ff]' : 'text-[#4c2e84]'" fill="none"
@@ -155,7 +166,7 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                 </div>
             </article>
@@ -168,11 +179,12 @@
                             :class="isDark ? 'bg-[#1b1b25] hover:bg-[#21212d]' : 'bg-[#eaeaf5] hover:bg-[#e0e0f0]'">
 
                             {{-- Thumbnail --}}
-                            <div class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg"
+                            <a href="{{ route('tutoriales.show', $tutorial) }}"
+                                class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e8e8ff]'">
-                                @if ($tutorial->cover_image_path)
-                                    <img src="{{ Storage::url($tutorial->cover_image_path) }}"
-                                        alt="{{ $tutorial->title }}"
+                                @php $thumb = $youtubeThumb($tutorial->video_url) ?? ($tutorial->cover_image_path ? Storage::url($tutorial->cover_image_path) : null); @endphp
+                                @if ($thumb)
+                                    <img src="{{ $thumb }}" alt="{{ $tutorial->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
                                     <svg class="h-12 w-12 opacity-20"
@@ -190,14 +202,15 @@
                                         </svg>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
 
                             {{-- Content --}}
                             <div class="flex flex-1 flex-col gap-2">
-                                <h3 class="font-display text-base font-bold leading-snug transition-colors group-hover:text-[#f4bf27]"
+                                <a href="{{ route('tutoriales.show', $tutorial) }}"
+                                    class="font-display text-base font-bold leading-snug transition-colors group-hover:text-[#f4bf27]"
                                     :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
                                     {{ $tutorial->title }}
-                                </h3>
+                                </a>
 
                                 @if ($tutorial->tags->isNotEmpty())
                                     <div class="flex flex-wrap gap-1">

@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/publicaciones', [PostController::class, 'index'])->name('publicaciones');
+Route::get('/publicaciones/{post:slug}', [PostController::class, 'show'])->name('publicaciones.show');
 Route::get('/tutoriales', [TutorialController::class, 'index'])->name('tutoriales');
+Route::get('/tutoriales/{post:slug}', [TutorialController::class, 'show'])->name('tutoriales.show');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

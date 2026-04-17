@@ -59,6 +59,11 @@ class PostForm
                             ->imageEditor()
                             ->visibility('public')
                             ->columnSpanFull(),
+                        TextInput::make('video_url')
+                            ->label('URL del video (YouTube)')
+                            ->url()
+                            ->placeholder('https://www.youtube.com/watch?v=...')
+                            ->columnSpanFull(),
                         Toggle::make('allow_comments')
                             ->label('Permitir comentarios')
                             ->default(true),
