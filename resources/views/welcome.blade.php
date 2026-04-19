@@ -1,4 +1,8 @@
-<x-layouts.public>
+<x-layouts.public
+    title="{{ config('app.name') }} — Plataforma Educativa de Desarrollo Web"
+    description="Domina el desarrollo web del futuro. Aprende las arquitecturas más avanzadas con cursos, tutoriales prácticos y publicaciones técnicas."
+    :canonical="route('home')"
+>
     {{-- ═══════════════════════════════════════════════════════════════════
          1. HERO
     ═══════════════════════════════════════════════════════════════════ --}}

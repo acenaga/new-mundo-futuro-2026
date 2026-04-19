@@ -1,3 +1,5 @@
+@props(['title' => null, 'description' => null, 'ogImage' => null, 'ogType' => 'website', 'canonical' => null])
+
 <!DOCTYPE html>
 <html
     lang="es"
@@ -8,6 +10,7 @@
 >
 <head>
     @include('partials.head')
+    @stack('head')
 </head>
 <body class="public-body antialiased transition-colors duration-300">
     <x-public.navbar />

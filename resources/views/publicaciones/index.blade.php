@@ -1,4 +1,8 @@
-<x-layouts.public>
+<x-layouts.public
+    title="Publicaciones — {{ config('app.name') }}"
+    description="Perspectivas profundas sobre el ecosistema tecnológico, entrevistas con líderes de la industria y análisis de tendencias del desarrollo web."
+    :canonical="route('publicaciones')"
+>
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HEADER

@@ -1,4 +1,4 @@
-<x-layouts.public :title="$post->title . ' — ' . config('app.name')">
+<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_path ? url(Storage::url($post->cover_image_path)) : null" ogType="article" :canonical="route('publicaciones.show', $post)">
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HERO
@@ -24,7 +24,8 @@
             {{-- Category + meta --}}
             <div class="mb-5 flex flex-wrap items-center gap-3">
                 @if ($post->category)
-                    <span class="font-display rounded-md bg-[#f4bf27] px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-[#342600]">
+                    <span
+                        class="font-display rounded-md bg-[#f4bf27] px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-[#342600]">
                         {{ $post->category->name }}
                     </span>
                 @endif
@@ -45,8 +46,7 @@
 
             {{-- Excerpt --}}
             @if ($post->excerpt)
-                <p class="font-body mb-8 text-lg leading-relaxed"
-                    :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
+                <p class="font-body mb-8 text-lg leading-relaxed" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
                     {{ $post->excerpt }}
                 </p>
             @endif
@@ -76,8 +76,9 @@
                             <a href="{{ route('publicaciones', ['tag' => $tag->slug]) }}"
                                 class="font-body rounded-md px-2.5 py-1 text-xs transition-colors"
                                 :class="isDark
-                                    ? 'bg-[#21212d] text-[#9999b3] hover:text-[#e2e2f0]'
-                                    : 'bg-[#eaeaf5] text-[#4a4a6a] hover:text-[#12121d]'">
+                                    ?
+                                    'bg-[#21212d] text-[#9999b3] hover:text-[#e2e2f0]' :
+                                    'bg-[#eaeaf5] text-[#4a4a6a] hover:text-[#12121d]'">
                                 {{ $tag->name }}
                             </a>
                         @endforeach
@@ -92,9 +93,8 @@
     ═══════════════════════════════════════════════════════════════════ --}}
     @if ($post->cover_image_path)
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
-            <div class="-mt-8 overflow-hidden rounded-2xl shadow-ambient">
-                <img src="{{ Storage::url($post->cover_image_path) }}"
-                    alt="{{ $post->title }}"
+            <div class="shadow-ambient -mt-8 overflow-hidden rounded-2xl">
+                <img src="{{ Storage::url($post->cover_image_path) }}" alt="{{ $post->title }}"
                     class="h-64 w-full object-cover lg:h-96">
             </div>
         </div>
@@ -106,8 +106,9 @@
     <div class="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
         <div class="font-body prose-lg max-w-none leading-relaxed"
             :class="isDark
-                ? 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]'
-                : 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#110090]'">
+                ?
+                'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
+                'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#110090]'">
             {!! nl2br(e($post->body)) !!}
         </div>
     </div>
@@ -150,8 +151,8 @@
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
                                     <svg class="h-10 w-10 opacity-10"
-                                        :class="isDark ? 'text-[#c1c1ff]' : 'text-[#110090]'"
-                                        fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                                        :class="isDark ? 'text-[#c1c1ff]' : 'text-[#110090]'" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
                                     </svg>
@@ -166,9 +167,12 @@
                                             {{ $relatedPost->category->name }}
                                         </span>
                                     @endif
-                                    <span :class="isDark ? 'text-[#3a3a55]' : 'text-[#d0d0e8]'" class="text-xs">·</span>
-                                    <span class="font-display text-xs" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
-                                        {{ max(1, (int) ceil(str_word_count(strip_tags($relatedPost->body ?? '')) / 200)) }} min
+                                    <span :class="isDark ? 'text-[#3a3a55]' : 'text-[#d0d0e8]'"
+                                        class="text-xs">·</span>
+                                    <span class="font-display text-xs"
+                                        :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
+                                        {{ max(1, (int) ceil(str_word_count(strip_tags($relatedPost->body ?? '')) / 200)) }}
+                                        min
                                     </span>
                                 </div>
 
@@ -188,7 +192,8 @@
                                     :class="isDark ? 'border-[#3a3a55]/30' : 'border-gray-200/60'">
                                     <a href="{{ route('publicaciones.show', $relatedPost) }}"
                                         class="font-display text-xs font-semibold transition-colors"
-                                        :class="isDark ? 'text-[#c1c1ff] hover:text-[#f4bf27]' : 'text-[#110090] hover:text-[#4c2e84]'">
+                                        :class="isDark ? 'text-[#c1c1ff] hover:text-[#f4bf27]' :
+                                            'text-[#110090] hover:text-[#4c2e84]'">
                                         Leer →
                                     </a>
                                 </div>
@@ -199,5 +204,35 @@
             </div>
         </div>
     @endif
+
+    @push('head')
+        <script type="application/ld+json">
+            @php
+                $jsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'Article',
+                    'headline' => $post->title,
+                    'description' => $post->excerpt,
+                    'datePublished' => $post->published_at?->toIso8601String(),
+                    'dateModified' => $post->updated_at->toIso8601String(),
+                    'author' => [
+                        '@type' => 'Person',
+                        'name' => $post->author?->name ?? config('app.name'),
+                    ],
+                    'publisher' => [
+                        '@type' => 'Organization',
+                        'name' => config('app.name'),
+                        'url' => url('/'),
+                    ],
+                    'url' => route('publicaciones.show', $post),
+                ];
+
+                if ($post->cover_image_path) {
+                    $jsonLd['image'] = url(Storage::url($post->cover_image_path));
+                }
+            @endphp
+            {!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endpush
 
 </x-layouts.public>
