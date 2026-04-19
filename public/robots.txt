@@ -4,3 +4,5 @@ Allow: /
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /settings
+
+Sitemap: http://localhost/sitemap.xml

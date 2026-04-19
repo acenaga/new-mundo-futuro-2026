@@ -120,7 +120,7 @@ Cada página pasa sus propios valores al instanciar el layout:
 <x-layouts.public
     :title="$post->title . ' — ' . config('app.name')"
     :description="$post->excerpt"
-    :ogImage="$post->cover_image_path ? Storage::url($post->cover_image_path) : null"
+    :ogImage="$post->cover_image_path ? url(Storage::url($post->cover_image_path)) : null"
     ogType="article"
     :canonical="route('tutoriales.show', $post)"
 >
@@ -159,16 +159,24 @@ Las páginas `show` inyectan datos estructurados en el `<head>` usando `@push('h
 ```blade
 @push('head')
 <script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "{{ $post->title }}",
-    "description": "{{ $post->excerpt }}",
-    "datePublished": "{{ $post->published_at?->toIso8601String() }}",
-    "dateModified": "{{ $post->updated_at->toIso8601String() }}",
-    "author": { "@type": "Person", "name": "{{ $post->author?->name }}" },
-    "publisher": { "@type": "Organization", "name": "{{ config('app.name') }}", "url": "{{ url('/') }}" }
-}
+    @php
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $post->title,
+            'description' => $post->excerpt,
+            'datePublished' => $post->published_at?->toIso8601String(),
+            'dateModified' => $post->updated_at->toIso8601String(),
+            'author' => ['@type' => 'Person', 'name' => $post->author?->name ?? config('app.name')],
+            'publisher' => ['@type' => 'Organization', 'name' => config('app.name'), 'url' => url('/')],
+            'url' => route('publicaciones.show', $post),
+        ];
+
+        if ($post->cover_image_path) {
+            $jsonLd['image'] = url(Storage::url($post->cover_image_path));
+        }
+    @endphp
+    {!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endpush
 ```

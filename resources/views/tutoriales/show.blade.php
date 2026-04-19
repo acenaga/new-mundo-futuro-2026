@@ -1,10 +1,4 @@
-<x-layouts.public
-    :title="$post->title . ' — ' . config('app.name')"
-    :description="$post->excerpt"
-    :ogImage="$post->cover_image_path ? Storage::url($post->cover_image_path) : null"
-    ogType="article"
-    :canonical="route('tutoriales.show', $post)"
->
+<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_path ? url(Storage::url($post->cover_image_path)) : null" ogType="article" :canonical="route('tutoriales.show', $post)">
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HERO
@@ -50,8 +44,7 @@
 
             {{-- Excerpt --}}
             @if ($post->excerpt)
-                <p class="font-body mb-8 text-lg leading-relaxed"
-                    :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
+                <p class="font-body mb-8 text-lg leading-relaxed" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
                     {{ $post->excerpt }}
                 </p>
             @endif
@@ -66,8 +59,9 @@
                             <a href="{{ route('tutoriales', ['tag' => $tag->slug]) }}"
                                 class="font-body rounded-md px-2.5 py-1 text-xs transition-colors"
                                 :class="isDark
-                                    ? 'bg-[#21212d] text-[#9999b3] hover:text-[#c1c1ff]'
-                                    : 'bg-[#eaeaf5] text-[#4a4a6a] hover:text-[#4c2e84]'">
+                                    ?
+                                    'bg-[#21212d] text-[#9999b3] hover:text-[#c1c1ff]' :
+                                    'bg-[#eaeaf5] text-[#4a4a6a] hover:text-[#4c2e84]'">
                                 {{ $tag->name }}
                             </a>
                         @endforeach
@@ -85,7 +79,8 @@
                                 :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
                                 {{ $post->author->name }}
                             </p>
-                            <p class="font-display text-xs" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">Instructor</p>
+                            <p class="font-display text-xs" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
+                                Instructor</p>
                         </div>
                     </div>
                 @endif
@@ -99,28 +94,28 @@
     @php
         $youtubeEmbed = null;
         if ($post->video_url) {
-            preg_match('/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $post->video_url, $m);
+            preg_match(
+                '/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+                $post->video_url,
+                $m,
+            );
             $youtubeEmbed = isset($m[1]) ? 'https://www.youtube.com/embed/' . $m[1] : null;
         }
     @endphp
 
     <div class="mx-auto max-w-5xl px-6 lg:px-8">
-        <div class="mt-10 overflow-hidden rounded-2xl shadow-ambient"
+        <div class="shadow-ambient mt-10 overflow-hidden rounded-2xl"
             :class="isDark ? 'bg-[#1b1b25]' : 'bg-[#e8e8ff]'">
             @if ($youtubeEmbed)
                 <div class="relative aspect-video w-full">
-                    <iframe
-                        src="{{ $youtubeEmbed }}"
-                        class="absolute inset-0 h-full w-full"
-                        frameborder="0"
+                    <iframe src="{{ $youtubeEmbed }}" class="absolute inset-0 h-full w-full" frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowfullscreen>
                     </iframe>
                 </div>
             @elseif ($post->cover_image_path)
                 <div class="relative">
-                    <img src="{{ Storage::url($post->cover_image_path) }}"
-                        alt="{{ $post->title }}"
+                    <img src="{{ Storage::url($post->cover_image_path) }}" alt="{{ $post->title }}"
                         class="h-64 w-full object-cover lg:h-[420px]">
                     <div class="absolute inset-0 flex items-center justify-center">
                         <div class="flex h-20 w-20 items-center justify-center rounded-full bg-[#f4bf27]/90 shadow-2xl">
@@ -156,8 +151,9 @@
     <div class="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
         <div class="font-body prose-lg max-w-none leading-relaxed"
             :class="isDark
-                ? 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]'
-                : 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84]'">
+                ?
+                'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
+                'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84]'">
             {!! nl2br(e($post->body)) !!}
         </div>
     </div>
@@ -201,15 +197,18 @@
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
                                     <svg class="h-12 w-12 opacity-20"
-                                        :class="isDark ? 'text-[#c1c1ff]' : 'text-[#4c2e84]'"
-                                        fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                                        :class="isDark ? 'text-[#c1c1ff]' : 'text-[#4c2e84]'" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                                     </svg>
                                 @endif
-                                <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4bf27]/90 shadow-md">
-                                        <svg class="ml-0.5 h-4 w-4 text-[#342600]" fill="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                    <div
+                                        class="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4bf27]/90 shadow-md">
+                                        <svg class="ml-0.5 h-4 w-4 text-[#342600]" fill="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path d="M8 5.14v14l11-7-11-7z" />
                                         </svg>
                                     </div>
@@ -237,15 +236,16 @@
 
                             <div class="mt-auto flex items-center gap-2 border-t pt-3 text-xs"
                                 :class="[isDark ? 'border-[#3a3a55]/30 text-[#9999b3]' : 'border-gray-200/60 text-[#4a4a6a]']">
-                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
+                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
                                 {{ $tutorial->published_at?->diffForHumans() ?? '—' }}
                                 <span class="ml-auto font-semibold"
                                     :class="isDark ? 'text-[#c1c1ff]' : 'text-[#4c2e84]'">
-                                    {{ max(1, (int) ceil(str_word_count(strip_tags($tutorial->body ?? '')) / 200)) }} min
+                                    {{ max(1, (int) ceil(str_word_count(strip_tags($tutorial->body ?? '')) / 200)) }}
+                                    min
                                 </span>
                             </div>
                         </article>
@@ -256,27 +256,33 @@
     @endif
 
     @push('head')
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "TechArticle",
-        "headline": "{{ $post->title }}",
-        "description": "{{ $post->excerpt }}",
-        "datePublished": "{{ $post->published_at?->toIso8601String() }}",
-        "dateModified": "{{ $post->updated_at->toIso8601String() }}",
-        "author": {
-            "@type": "Person",
-            "name": "{{ $post->author?->name ?? config('app.name') }}"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "{{ config('app.name') }}",
-            "url": "{{ url('/') }}"
-        },
-        "url": "{{ route('tutoriales.show', $post) }}"@if($post->cover_image_path),
-        "image": "{{ Storage::url($post->cover_image_path) }}"@endif
-    }
-    </script>
+        <script type="application/ld+json">
+            @php
+                $jsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'TechArticle',
+                    'headline' => $post->title,
+                    'description' => $post->excerpt,
+                    'datePublished' => $post->published_at?->toIso8601String(),
+                    'dateModified' => $post->updated_at->toIso8601String(),
+                    'author' => [
+                        '@type' => 'Person',
+                        'name' => $post->author?->name ?? config('app.name'),
+                    ],
+                    'publisher' => [
+                        '@type' => 'Organization',
+                        'name' => config('app.name'),
+                        'url' => url('/'),
+                    ],
+                    'url' => route('tutoriales.show', $post),
+                ];
+
+                if ($post->cover_image_path) {
+                    $jsonLd['image'] = url(Storage::url($post->cover_image_path));
+                }
+            @endphp
+            {!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
     @endpush
 
 </x-layouts.public>
