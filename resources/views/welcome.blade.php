@@ -31,8 +31,8 @@
 
                     <p class="font-body max-w-lg text-base leading-relaxed lg:text-lg"
                         :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
-                        Aprende las arquitecturas más avanzadas y las herramientas que definirán la próxima década de la
-                        web. De WebGL a AI-Driven Interfaces.
+                        Una plataforma educativa diseñada para llevarte desde principiante absoluto hasta desarrollador
+                        avanzado. Cursos, noticias tech y tecnología moderna explicada de forma simple.
                     </p>
 
                     <div class="flex flex-wrap items-center gap-4">
