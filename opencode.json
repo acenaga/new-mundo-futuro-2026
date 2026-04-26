@@ -20,6 +20,12 @@
             "environment": {
                 "SITE_PATH": "C:\\laragon\\www\\new-mundo-futuro-2026"
             }
+        },
+        "nightwatch": {
+            "type": "remote",
+            "enabled": true,
+            "url": "https://nightwatch.laravel.com/mcp",
+            "oauth": {}
         }
     }
 }

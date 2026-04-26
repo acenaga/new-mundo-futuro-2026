@@ -11,3 +11,7 @@ SITE_PATH = "C:\\laragon\\www\\new-mundo-futuro-2026"
 command = "php"
 args = ["artisan", "boost:mcp"]
 cwd = "/Users/acenaga/Herd/new-mundo-futuro"
+
+[mcp_servers.nightwatch]
+command = "npx"
+args = ["-y", "mcp-remote", "https://nightwatch.laravel.com/mcp"]
