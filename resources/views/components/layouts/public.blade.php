@@ -25,19 +25,36 @@
 
     <script>
         function themeManager() {
-            const stored = localStorage.getItem('flux_appearance') ?? localStorage.getItem('appearance');
             return {
-                isDark: stored !== 'light',
+                isDark: true,
+                mediaQuery: window.matchMedia('(prefers-color-scheme: dark)'),
+                syncFromStorage() {
+                    const stored = localStorage.getItem('flux_appearance') ?? localStorage.getItem('appearance');
+
+                    this.isDark = window.resolveThemePreference(stored) === 'dark';
+                },
+                handleSystemAppearanceChange(event) {
+                    const stored = localStorage.getItem('flux_appearance') ?? localStorage.getItem('appearance');
+
+                    if (stored === 'system') {
+                        this.isDark = event.matches;
+                    }
+                },
                 init() {
-                    // Apply initial state — :class on <html> root is unreliable in Alpine
+                    this.syncFromStorage();
+
                     document.documentElement.classList.toggle('dark', this.isDark);
+
                     this.$watch('isDark', val => {
                         document.documentElement.classList.toggle('dark', val);
-                        localStorage.setItem('flux_appearance', val ? 'dark' : 'light');
                     });
+
+                    this.handleSystemAppearanceChange = this.handleSystemAppearanceChange.bind(this);
+                    this.mediaQuery.addEventListener('change', this.handleSystemAppearanceChange);
                 },
                 toggle() {
                     this.isDark = !this.isDark;
+                    localStorage.setItem('flux_appearance', this.isDark ? 'dark' : 'light');
                 },
             };
         }

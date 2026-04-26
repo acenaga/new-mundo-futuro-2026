@@ -51,7 +51,24 @@
         </ul>
 
         {{-- Right actions --}}
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <a
+                href="{{ route('login') }}"
+                class="hidden rounded-lg px-4 py-2 text-sm font-semibold transition-colors sm:block"
+                :class="isDark
+                    ?
+                    'text-[#e2e2f0] hover:bg-[#292934] hover:text-[#f4bf27]' :
+                    'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'"
+            >
+                Log in
+            </a>
+
+            <a
+                href="{{ route('register') }}"
+                class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block"
+            >
+                Sign up
+            </a>
 
             {{-- Theme toggle --}}
             <button @click="toggle()" class="rounded-lg p-2 transition-colors"
@@ -73,15 +90,6 @@
                         d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
                 </svg>
             </button>
-
-            {{-- CTA button (desktop) --}}
-            {{-- <a
-
-                href="{{ route('register') }}"
-                class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block"
-            >
-                COMENZAR →
-            </a> --}}
 
             {{-- Mobile hamburger --}}
             <button @click="open = !open" class="rounded-lg p-2 transition-colors lg:hidden"
@@ -110,27 +118,41 @@
         x-transition:leave-end="opacity-0 -translate-y-2" class="border-t px-6 pb-4 lg:hidden"
         :class="isDark ? 'border-[#3a3a55]/30' : 'border-gray-200/50'">
         <ul class="mt-3 flex flex-col gap-1">
-            <li>
-                <a href="{{ route('home') }}" class="block rounded-md px-3 py-2 text-sm font-medium transition-colors"
-                    :class="isDark ? 'text-[#e2e2f0] hover:text-[#f4bf27] hover:bg-[#292934]' :
-                        'text-[#12121d] hover:bg-gray-100'">
-                    Inicio
-                </a>
-            </li>
-            @foreach (['Cursos', 'Comunidad'] as $item)
+            @foreach ($links as $link)
                 <li>
-                    <span class="block cursor-not-allowed rounded-md px-3 py-2 text-sm font-medium opacity-40"
-                        :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
-                        {{ $item }}
-                    </span>
+                    @if ($link['disabled'])
+                        <span class="block cursor-not-allowed rounded-md px-3 py-2 text-sm font-medium opacity-40"
+                            :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
+                            {{ $link['label'] }}
+                        </span>
+                    @else
+                        <a href="{{ route($link['route']) }}" class="block rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                            :class="isDark ? 'text-[#e2e2f0] hover:text-[#f4bf27] hover:bg-[#292934]' :
+                                'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'">
+                            {{ $link['label'] }}
+                        </a>
+                    @endif
                 </li>
             @endforeach
         </ul>
         <div class="mt-4 border-t pt-4" :class="isDark ? 'border-[#3a3a55]/30' : 'border-gray-200/50'">
-            <a href="{{ route('register') }}"
-                class="block w-full rounded-lg bg-[#f4bf27] py-2 text-center text-sm font-bold text-[#342600]">
-                COMENZAR →
-            </a>
+            <div class="grid gap-3">
+                <a
+                    href="{{ route('login') }}"
+                    class="block w-full rounded-lg border px-4 py-2 text-center text-sm font-semibold transition-colors"
+                    :class="isDark
+                        ?
+                        'border-[#3a3a55] text-[#e2e2f0] hover:border-[#f4bf27] hover:text-[#f4bf27]' :
+                        'border-[#110090]/20 text-[#12121d] hover:border-[#110090] hover:text-[#110090]'"
+                >
+                    Log in
+                </a>
+
+                <a href="{{ route('register') }}"
+                    class="block w-full rounded-lg bg-[#f4bf27] px-4 py-2 text-center text-sm font-bold text-[#342600] transition-all hover:brightness-110">
+                    Sign up
+                </a>
+            </div>
         </div>
     </div>
 </header>

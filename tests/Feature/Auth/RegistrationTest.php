@@ -3,7 +3,15 @@
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
 
-    $response->assertOk();
+    $response->assertOk()
+        ->assertSee('Mundo Futuro')
+        ->assertSee('logo.svg', false)
+        ->assertSee('logo-dark.svg', false)
+        ->assertSee('data-test="auth-back-button"', false)
+        ->assertSee('Volver')
+        ->assertSee('Create an account')
+        ->assertSee('Log in')
+        ->assertSee('prefers-color-scheme: dark', false);
 });
 
 test('new users can register', function () {
