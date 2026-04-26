@@ -1,8 +1,6 @@
-<x-layouts.public
-    title="{{ config('app.name') }} — Plataforma Educativa de Desarrollo Web"
-    description="Domina el desarrollo web del futuro. Aprende las arquitecturas más avanzadas con cursos, tutoriales prácticos y publicaciones técnicas."
-    :canonical="route('home')"
->
+<x-layouts.public title="Aprende Desarrollo Web desde Cero | {{ config('app.name') }}"
+    description="Iníciate en el desarrollo web de forma fácil. Únete para acceder a cursos desde cero, tutoriales guiados y toda la actualidad del mundo de la tecnología."
+    :canonical="route('home')">
     {{-- ═══════════════════════════════════════════════════════════════════
          1. HERO
     ═══════════════════════════════════════════════════════════════════ --}}
@@ -33,8 +31,8 @@
 
                     <p class="font-body max-w-lg text-base leading-relaxed lg:text-lg"
                         :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
-                        Aprende las arquitecturas más avanzadas y las herramientas que definirán la próxima década de la
-                        web. De WebGL a AI-Driven Interfaces.
+                        Una plataforma educativa diseñada para llevarte desde principiante absoluto hasta desarrollador
+                        avanzado. Cursos, noticias tech y tecnología moderna explicada de forma simple.
                     </p>
 
                     <div class="flex flex-wrap items-center gap-4">
@@ -57,7 +55,8 @@
                     <div class="relative">
                         <div class="absolute inset-0 -m-8 rounded-full blur-3xl"
                             :class="isDark ? 'bg-[#4c2e84]/20' : 'bg-[#c1c1ff]/30'"></div>
-                        <img :src="isDark ? '{{ asset('assets/img/logo-dark.svg') }}' : '{{ asset('assets/img/logo.svg') }}'" alt="Mundo Futuro"
+                        <img :src="isDark ? '{{ asset('assets/img/logo-dark.svg') }}' : '{{ asset('assets/img/logo.svg') }}'"
+                            alt="Mundo Futuro"
                             class="relative z-10 h-64 w-64 object-contain drop-shadow-2xl lg:h-80 lg:w-80">
                     </div>
                 </div>

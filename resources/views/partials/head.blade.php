@@ -1,6 +1,6 @@
 <meta charset="utf-8" />
 <script>
-    (function () {
+    (function() {
         var s = localStorage.getItem('flux_appearance') || localStorage.getItem('appearance');
         if (s === 'light') {
             document.documentElement.classList.remove('dark');
@@ -12,7 +12,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 @php
     $seoTitle = $title ?? config('app.name');
-    $seoDescription = strip_tags($description ?? 'Mundo Futuro es una plataforma educativa enfocada en desarrollo web avanzado, tutoriales prácticos y publicaciones técnicas.');
+    $seoDescription = strip_tags(
+        $description ??
+            'Mundo Futuro es una plataforma educativa enfocada en desarrollo web avanzado, tutoriales prácticos y publicaciones técnicas.',
+    );
     $seoCanonical = $canonical ?? url()->current();
     $seoOgType = $ogType ?? 'website';
     $seoOgImage = $ogImage ?? asset('apple-touch-icon.png');
@@ -42,7 +45,25 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
-<link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600|space-grotesk:400,500,600,700|inter:400,500,600" rel="stylesheet" />
+<link
+    href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600|space-grotesk:400,500,600,700|inter:400,500,600"
+    rel="stylesheet" />
+
+@if (env('APP_ENV') === 'production')
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1HTHPRCFMN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'G-1HTHPRCFMN');
+    </script>
+@else
+    <meta name="robots" content="noindex">
+@endif
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
