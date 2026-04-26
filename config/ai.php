@@ -82,6 +82,12 @@ return [
             'key' => env('GROQ_API_KEY'),
         ],
 
+        'kimi' => [
+            'driver' => 'openai',
+            'key' => env('KIMI_API_KEY'),
+            'url' => env('KIMI_BASE_URL', 'https://api.moonshot.ai/v1'),
+        ],
+
         'jina' => [
             'driver' => 'jina',
             'key' => env('JINA_API_KEY'),

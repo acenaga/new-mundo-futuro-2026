@@ -337,6 +337,69 @@ El archivo principal es `resources/css/app.css` (Tailwind CSS 4).
 
 ---
 
+## Inteligencia Artificial
+
+El proyecto usa el paquete oficial `laravel/ai` (v0) para integraciones con modelos de lenguaje.
+
+### Proveedores configurados
+
+| Proveedor | Driver | Variable de entorno | Modelos destacados |
+|---|---|---|---|
+| OpenAI | `openai` | `OPENAI_API_KEY` | gpt-4o, gpt-4-turbo |
+| Gemini | `gemini` | `GEMINI_API_KEY` | gemini-2.0-flash (imágenes) |
+| Kimi (Moonshot) | `openai`* | `KIMI_API_KEY` | kimi-k2.5, kimi-k2.6, moonshot-v1-32k |
+| Groq | `groq` | `GROQ_API_KEY` | llama3, mixtral |
+| DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` | deepseek-chat |
+| Anthropic | `anthropic` | `ANTHROPIC_API_KEY` | claude-3-5-sonnet |
+
+_*Kimi usa el driver `openai` apuntando a `https://api.moonshot.ai/v1` — API 100% compatible._
+
+### Proveedores por defecto
+
+| Operación | Proveedor |
+|---|---|
+| Texto | `openai` |
+| Imágenes | `gemini` |
+| Audio / Transcripción | `openai` |
+| Embeddings | `openai` |
+| Reranking | `cohere` |
+
+### Kimi AI
+
+Kimi es el modelo de Moonshot AI, configurado como proveedor alternativo de texto con soporte para contextos largos.
+
+**Variables necesarias en `.env`:**
+
+```env
+KIMI_API_KEY=sk-...
+KIMI_BASE_URL=https://api.moonshot.ai/v1
+```
+
+**Uso en código:**
+
+```php
+use Laravel\Ai\Facades\Ai;
+
+$response = Ai::provider('kimi')
+    ->text('moonshot-v1-32k')
+    ->generate('Tu prompt aquí');
+```
+
+**Modelos disponibles:**
+
+| Modelo | Contexto | Uso recomendado |
+|---|---|---|
+| `moonshot-v1-8k` | 8 K tokens | Respuestas cortas, rápido |
+| `moonshot-v1-32k` | 32 K tokens | Uso general |
+| `moonshot-v1-128k` | 128 K tokens | Documentos largos |
+| `kimi-k2.5` | — | Razonamiento avanzado |
+| `kimi-k2.6` | — | Última versión estable |
+| `kimi-k2-thinking` | — | Modo de razonamiento profundo |
+
+> **Nota:** La temperatura máxima de Kimi es `1.0` (no `2.0` como OpenAI). No soporta `tool_choice=required`.
+
+---
+
 ## Convenciones de desarrollo
 
 - **PHP**: PHP 8.4, constructor property promotion, tipos explícitos en todos los métodos.
