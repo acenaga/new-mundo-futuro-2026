@@ -53,6 +53,16 @@ class YouTubeEmbed
             .'</div>';
     }
 
+    public static function token(string $videoId): string
+    {
+        return '[[youtube:'.$videoId.']]';
+    }
+
+    public static function insertMarkup(string $videoId): string
+    {
+        return self::editorPreviewHtml($videoId).'<p>'.self::token($videoId).'</p>';
+    }
+
     public static function editorPreviewHtml(string $videoId): string
     {
         return '<figure class="nmf-youtube-preview my-4 overflow-hidden rounded-lg border border-gray-300/60">'
@@ -60,5 +70,38 @@ class YouTubeEmbed
             .'alt="Vista previa de YouTube" class="h-auto w-full object-cover" loading="lazy">'
             .'<figcaption class="px-3 py-2 text-xs text-gray-600">Vista previa del video (solo editor)</figcaption>'
             .'</figure>';
+    }
+
+    public static function replaceInContent(string $content, string $fromVideoId, string $toVideoId): string
+    {
+        $updated = str_replace(self::token($fromVideoId), self::token($toVideoId), $content);
+        $updated = str_replace('/vi/'.$fromVideoId.'/', '/vi/'.$toVideoId.'/', $updated);
+
+        return $updated;
+    }
+
+    public static function removeFromContent(string $content, string $videoId): string
+    {
+        $figurePattern = '/<figure[^>]*class=["\'][^"\']*nmf-youtube-preview[^"\']*["\'][^>]*>.*?\/vi\/'
+            .preg_quote($videoId, '/')
+            .'.*?<\/figure>/si';
+
+        $withoutPreview = preg_replace($figurePattern, '', $content);
+
+        if (! is_string($withoutPreview)) {
+            $withoutPreview = $content;
+        }
+
+        $withoutTokenParagraph = preg_replace(
+            '/<p>\s*\[\[youtube:'.preg_quote($videoId, '/').'\]\]\s*<\/p>/i',
+            '',
+            $withoutPreview,
+        );
+
+        if (! is_string($withoutTokenParagraph)) {
+            $withoutTokenParagraph = $withoutPreview;
+        }
+
+        return str_replace(self::token($videoId), '', $withoutTokenParagraph);
     }
 }

@@ -41,7 +41,7 @@ class CourseForm
                         YouTubeEmbedRichContentPlugin::make(),
                     ])
                     ->enableToolbarButtons([
-                        ['youtubeEmbed'],
+                        ['youtubeEmbed', 'youtubeReplace', 'youtubeRemove'],
                     ])
                     ->preventFileAttachmentPathTampering()
                     ->rule(new OnlyYouTubeEmbeds)
