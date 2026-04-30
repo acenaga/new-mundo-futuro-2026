@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -90,5 +91,6 @@ test('super admins can access the filament panel', function () {
 
     $user->assignRole('super_admin');
 
+    expect($user)->toBeInstanceOf(FilamentUser::class);
     expect($user->canAccessPanel(Mockery::mock(Panel::class)))->toBeTrue();
 });
