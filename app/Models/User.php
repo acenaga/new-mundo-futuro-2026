@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Database\Factories\UserFactory;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
@@ -64,7 +65,7 @@ class User extends Authenticatable
     {
         // Si el usuario tiene rol Admin, Tutor o Editor, puede entrar.
         // Los estudiantes (usuarios normales) NO pueden entrar aquí.
-        return $this->hasAnyRole(['admin', 'tutor', 'editor']) && $this->hasVerifiedEmail();
+        return $this->hasAnyRole(['super_admin', 'admin', 'tutor', 'editor']) && $this->hasVerifiedEmail();
     }
 
     /**
