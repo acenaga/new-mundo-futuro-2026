@@ -10,7 +10,8 @@
 
         {{-- Logo --}}
         <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-3" aria-label="Mundo Futuro">
-            <img :src="isDark ? '{{ asset('assets/img/logo-dark.svg') }}' : '{{ asset('assets/img/logo.svg') }}'" alt="Mundo Futuro" class="h-9 w-auto">
+            <img :src="isDark ? '{{ asset('assets/img/logo-dark.svg') }}' : '{{ asset('assets/img/logo.svg') }}'"
+                alt="Mundo Futuro" class="h-9 w-auto">
             <span class="font-display hidden text-base font-bold tracking-tight sm:block"
                 :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
                 MUNDO FUTURO
@@ -52,23 +53,30 @@
 
         {{-- Right actions --}}
         <div class="flex items-center gap-2 sm:gap-3">
-            <a
-                href="{{ route('login') }}"
-                class="hidden rounded-lg px-4 py-2 text-sm font-semibold transition-colors sm:block"
-                :class="isDark
-                    ?
-                    'text-[#e2e2f0] hover:bg-[#292934] hover:text-[#f4bf27]' :
-                    'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'"
-            >
-                Log in
-            </a>
+            @auth
+                <span class="hidden text-sm font-medium sm:block" :class="isDark ? 'text-[#9999b3]' : 'text-[#4a4a6a]'">
+                    Hola, {{ auth()->user()->name }}
+                </span>
 
-            <a
-                href="{{ route('register') }}"
-                class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block"
-            >
-                Sign up
-            </a>
+                <a href="{{ route('dashboard') }}"
+                    class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block">
+                    Ir al panel
+                </a>
+            @else
+                <a href="{{ route('login') }}"
+                    class="hidden rounded-lg px-4 py-2 text-sm font-semibold transition-colors sm:block"
+                    :class="isDark
+                        ?
+                        'text-[#e2e2f0] hover:bg-[#292934] hover:text-[#f4bf27]' :
+                        'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'">
+                    Log in
+                </a>
+
+                <a href="{{ route('register') }}"
+                    class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block">
+                    Sign up
+                </a>
+            @endauth
 
             {{-- Theme toggle --}}
             <button @click="toggle()" class="rounded-lg p-2 transition-colors"
@@ -126,7 +134,8 @@
                             {{ $link['label'] }}
                         </span>
                     @else
-                        <a href="{{ route($link['route']) }}" class="block rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                        <a href="{{ route($link['route']) }}"
+                            class="block rounded-md px-3 py-2 text-sm font-medium transition-colors"
                             :class="isDark ? 'text-[#e2e2f0] hover:text-[#f4bf27] hover:bg-[#292934]' :
                                 'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'">
                             {{ $link['label'] }}
@@ -137,21 +146,31 @@
         </ul>
         <div class="mt-4 border-t pt-4" :class="isDark ? 'border-[#3a3a55]/30' : 'border-gray-200/50'">
             <div class="grid gap-3">
-                <a
-                    href="{{ route('login') }}"
-                    class="block w-full rounded-lg border px-4 py-2 text-center text-sm font-semibold transition-colors"
-                    :class="isDark
-                        ?
-                        'border-[#3a3a55] text-[#e2e2f0] hover:border-[#f4bf27] hover:text-[#f4bf27]' :
-                        'border-[#110090]/20 text-[#12121d] hover:border-[#110090] hover:text-[#110090]'"
-                >
-                    Log in
-                </a>
+                @auth
+                    <div class="rounded-lg px-4 py-2 text-center text-sm font-medium"
+                        :class="isDark ? 'bg-[#292934] text-[#c1c1ff]' : 'bg-[#f4f4fb] text-[#4a4a6a]'">
+                        Hola, {{ auth()->user()->name }}
+                    </div>
 
-                <a href="{{ route('register') }}"
-                    class="block w-full rounded-lg bg-[#f4bf27] px-4 py-2 text-center text-sm font-bold text-[#342600] transition-all hover:brightness-110">
-                    Sign up
-                </a>
+                    <a href="{{ route('dashboard') }}"
+                        class="block w-full rounded-lg bg-[#f4bf27] px-4 py-2 text-center text-sm font-bold text-[#342600] transition-all hover:brightness-110">
+                        Ir al panel
+                    </a>
+                @else
+                    <a href="{{ route('login') }}"
+                        class="block w-full rounded-lg border px-4 py-2 text-center text-sm font-semibold transition-colors"
+                        :class="isDark
+                            ?
+                            'border-[#3a3a55] text-[#e2e2f0] hover:border-[#f4bf27] hover:text-[#f4bf27]' :
+                            'border-[#110090]/20 text-[#12121d] hover:border-[#110090] hover:text-[#110090]'">
+                        Log in
+                    </a>
+
+                    <a href="{{ route('register') }}"
+                        class="block w-full rounded-lg bg-[#f4bf27] px-4 py-2 text-center text-sm font-bold text-[#342600] transition-all hover:brightness-110">
+                        Sign up
+                    </a>
+                @endauth
             </div>
         </div>
     </div>
