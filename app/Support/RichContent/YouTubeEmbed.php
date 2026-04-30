@@ -47,35 +47,35 @@ class YouTubeEmbed
     public static function iframeHtml(string $videoId): string
     {
         return '<div class="my-6 aspect-video w-full overflow-hidden rounded-lg">'
-            .'<iframe src="https://www.youtube.com/embed/'.$videoId.'" class="h-full w-full" frameborder="0" '
-            .'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
-            .'referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen></iframe>'
-            .'</div>';
+            . '<iframe src="https://www.youtube.com/embed/' . $videoId . '" class="h-full w-full" frameborder="0" '
+            . 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
+            . 'referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen></iframe>'
+            . '</div>';
     }
 
     public static function token(string $videoId): string
     {
-        return '[[youtube:'.$videoId.']]';
+        return '[[youtube:' . $videoId . ']]';
     }
 
     public static function insertMarkup(string $videoId): string
     {
-        return self::editorPreviewHtml($videoId).'<p>'.self::token($videoId).'</p>';
+        return self::editorPreviewHtml($videoId) . '<p>' . self::token($videoId) . '</p>';
     }
 
     public static function editorPreviewHtml(string $videoId): string
     {
         return '<figure class="nmf-youtube-preview my-4 overflow-hidden rounded-lg border border-gray-300/60">'
-            .'<img src="https://img.youtube.com/vi/'.$videoId.'/hqdefault.jpg" '
-            .'alt="Vista previa de YouTube" class="h-auto w-full object-cover" loading="lazy">'
-            .'<figcaption class="px-3 py-2 text-xs text-gray-600">Vista previa del video (solo editor)</figcaption>'
-            .'</figure>';
+            . '<img src="https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg" '
+            . 'alt="Vista previa de YouTube" class="h-auto w-full object-cover" loading="lazy">'
+            . '<figcaption class="px-3 py-2 text-xs text-gray-600">Vista previa del video (solo editor)</figcaption>'
+            . '</figure>';
     }
 
     public static function replaceInContent(string $content, string $fromVideoId, string $toVideoId): string
     {
         $updated = str_replace(self::token($fromVideoId), self::token($toVideoId), $content);
-        $updated = str_replace('/vi/'.$fromVideoId.'/', '/vi/'.$toVideoId.'/', $updated);
+        $updated = str_replace('/vi/' . $fromVideoId . '/', '/vi/' . $toVideoId . '/', $updated);
 
         return $updated;
     }
@@ -83,8 +83,8 @@ class YouTubeEmbed
     public static function removeFromContent(string $content, string $videoId): string
     {
         $figurePattern = '/<figure[^>]*class=["\'][^"\']*nmf-youtube-preview[^"\']*["\'][^>]*>.*?\/vi\/'
-            .preg_quote($videoId, '/')
-            .'.*?<\/figure>/si';
+            . preg_quote($videoId, '/')
+            . '.*?<\/figure>/si';
 
         $withoutPreview = preg_replace($figurePattern, '', $content);
 
@@ -93,7 +93,7 @@ class YouTubeEmbed
         }
 
         $withoutTokenParagraph = preg_replace(
-            '/<p>\s*\[\[youtube:'.preg_quote($videoId, '/').'\]\]\s*<\/p>/i',
+            '/<p>\s*\[\[youtube:' . preg_quote($videoId, '/') . '\]\]\s*<\/p>/i',
             '',
             $withoutPreview,
         );

@@ -18,7 +18,7 @@ class RichContentOutput
 
         $withParagraphTokens = preg_replace_callback(
             '/<p>\s*\[\[youtube:([a-zA-Z0-9_-]{11})\]\]\s*<\/p>/',
-            fn (array $matches): string => YouTubeEmbed::iframeHtml($matches[1]),
+            fn(array $matches): string => YouTubeEmbed::iframeHtml($matches[1]),
             $withoutEditorPreviewBlocks,
         );
 
@@ -28,7 +28,7 @@ class RichContentOutput
 
         $withInlineTokens = preg_replace_callback(
             '/\[\[youtube:([a-zA-Z0-9_-]{11})\]\]/',
-            fn (array $matches): string => YouTubeEmbed::iframeHtml($matches[1]),
+            fn(array $matches): string => YouTubeEmbed::iframeHtml($matches[1]),
             $withParagraphTokens,
         );
 
