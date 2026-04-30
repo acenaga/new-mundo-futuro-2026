@@ -12,9 +12,9 @@ test('login screen can be rendered', function () {
         ->assertSee('logo-dark.svg', false)
         ->assertSee('data-test="auth-back-button"', false)
         ->assertSee('Volver')
-        ->assertSee('Log in to your account')
-        ->assertSee('Forgot your password?')
-        ->assertSee('Sign up')
+        ->assertSee('Inicia sesión en tu cuenta')
+        ->assertSee('¿Olvidaste tu contraseña?')
+        ->assertSee('Regístrate')
         ->assertSee('prefers-color-scheme: dark', false);
 });
 

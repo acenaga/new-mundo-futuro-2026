@@ -69,12 +69,12 @@
                         ?
                         'text-[#e2e2f0] hover:bg-[#292934] hover:text-[#f4bf27]' :
                         'text-[#12121d] hover:bg-gray-100 hover:text-[#110090]'">
-                    Log in
+                    Inicia sesión
                 </a>
 
                 <a href="{{ route('register') }}"
                     class="hidden rounded-lg bg-[#f4bf27] px-4 py-2 text-sm font-bold text-[#342600] transition-all hover:brightness-110 sm:block">
-                    Sign up
+                    Registro
                 </a>
             @endauth
 

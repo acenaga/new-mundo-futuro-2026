@@ -12,5 +12,9 @@ test('authenticated users can visit the dashboard', function () {
     $this->actingAs($user);
 
     $response = $this->get(route('dashboard'));
-    $response->assertOk();
+    $response->assertOk()
+        ->assertSee('Mundo Futuro')
+        ->assertSee('Continua tu ruta de aprendizaje en Mundo Futuro.')
+        ->assertSee('Explorar tutoriales')
+        ->assertSee('logo-dark.svg', false);
 });

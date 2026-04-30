@@ -3,17 +3,23 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-[#f4f4fb] text-[#12121d] dark:bg-[#12121d] dark:text-[#e2e2f0]">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-[#110090]/10 bg-white/85 backdrop-blur dark:border-[#3a3a55] dark:bg-[#12121d]/90">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
+                <flux:sidebar.group :heading="__('Plataforma')" class="grid">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="newspaper" :href="route('publicaciones')" :current="request()->routeIs('publicaciones*')" wire:navigate>
+                        {{ __('Publicaciones') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="academic-cap" :href="route('tutoriales')" :current="request()->routeIs('tutoriales*')" wire:navigate>
+                        {{ __('Tutoriales') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
@@ -21,12 +27,8 @@
             <flux:spacer />
 
             <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
+                <flux:sidebar.item icon="arrow-up-right" :href="route('home')" wire:navigate>
+                    {{ __('Inicio') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
@@ -35,7 +37,7 @@
 
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
+        <flux:header class="border-b border-[#110090]/10 bg-white/85 backdrop-blur dark:border-[#3a3a55] dark:bg-[#12121d]/85 lg:hidden">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
