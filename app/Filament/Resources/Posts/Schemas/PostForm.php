@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Enums\PostStatus;
+use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -29,8 +31,8 @@ class PostForm
                             ->relationship('author', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(fn () => auth()->id())
-                            ->visible(fn () => auth()->user()?->hasRole('admin'))
+                            ->default(fn() => auth()->id())
+                            ->visible(fn() => auth()->user()?->hasRole('admin'))
                             ->required(),
                         Select::make('category_id')
                             ->label('Categoría')
@@ -77,7 +79,7 @@ class PostForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
                         TextInput::make('slug')
                             ->required()
                             ->disabled()
@@ -90,7 +92,15 @@ class PostForm
                             ->maxLength(500),
                         RichEditor::make('body')
                             ->label('Contenido')
-                            ->required(),
+                            ->required()
+                            ->plugins([
+                                YouTubeEmbedRichContentPlugin::make(),
+                            ])
+                            ->enableToolbarButtons([
+                                ['youtubeEmbed', 'youtubeReplace', 'youtubeRemove'],
+                            ])
+                            ->preventFileAttachmentPathTampering()
+                            ->rule(new OnlyYouTubeEmbeds),
                     ]),
             ]);
     }

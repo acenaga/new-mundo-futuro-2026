@@ -245,8 +245,8 @@ El layout tiene `@stack('head')` justo antes de `</head>`, por lo que este bloqu
 
 ```php
 $posts     = Post::where('status', PostStatus::Published)->with('category')->get();
-$tutorials = $posts->filter(fn ($p) => $p->category?->slug === 'tutorials');
-$publicaciones = $posts->filter(fn ($p) => $p->category?->slug !== 'tutorials');
+$tutorials = $posts->filter(fn ($p) => $p->category?->slug === 'tutoriales');
+$publicaciones = $posts->filter(fn ($p) => $p->category?->slug !== 'tutoriales');
 
 return response()->view('sitemap', compact('tutorials', 'publicaciones'))
     ->header('Content-Type', 'application/xml');
@@ -332,10 +332,77 @@ Slugs reservados del sistema:
 
 | Slug | Descripción |
 |---|---|
-| `tutorials` | Tutoriales (aparece en `/tutoriales`, no en `/publicaciones`) |
+| `tutoriales` | Tutoriales (aparece en `/tutoriales`, no en `/publicaciones`) |
 | `noticias` | Noticias del ecosistema |
 | `opinion` | Artículos de opinión |
 | `analisis` | Análisis técnicos |
+
+---
+
+## RichEditor, imágenes y YouTube
+
+El proyecto integra `spatie/laravel-medialibrary` y el plugin oficial de Filament para soportar adjuntos dentro del RichEditor en `Post::body` y `Course::description`.
+
+### Dependencias
+
+| Paquete | Uso |
+|---|---|
+| `spatie/laravel-medialibrary` | Tabla `media` y gestión de archivos adjuntos |
+| `filament/spatie-laravel-media-library-plugin` | Provider de adjuntos para `RichEditor` |
+
+### Integración en modelos
+
+`Post` y `Course` implementan `HasRichContent` + `HasMedia` y registran sus atributos de contenido rico con provider de Spatie.
+
+| Modelo | Atributo RichEditor | Colección de media |
+|---|---|---|
+| `Post` | `body` | `post-body-attachments` |
+| `Course` | `description` | `course-description-attachments` |
+
+### Toolbar de YouTube en Filament
+
+Ambos editores (`PostForm` y `CourseForm`) habilitan tres herramientas:
+
+- `youtubeEmbed` — inserta un video desde URL/ID.
+- `youtubeReplace` — actualiza un video existente por otro.
+- `youtubeRemove` — elimina un video del contenido.
+
+El plugin vive en:
+
+- `app/Filament/RichEditor/Plugins/YouTubeEmbedRichContentPlugin.php`
+
+### Flujo de render
+
+En edición, el plugin inserta:
+
+1. Un bloque de preview visual (`figure.nmf-youtube-preview`) para UX del editor.
+2. Un token persistente: `[[youtube:VIDEO_ID]]`.
+
+En frontend, se renderiza con:
+
+- `App\Support\RichContent\RichContentOutput::render(...)`
+
+Ese renderer:
+
+1. Elimina el bloque de preview (solo editor).
+2. Convierte el token al iframe final de YouTube.
+
+Vistas públicas que usan este flujo:
+
+- `resources/views/publicaciones/show.blade.php`
+- `resources/views/tutoriales/show.blade.php`
+
+### Seguridad
+
+- Regla `OnlyYouTubeEmbeds` aplicada a ambos RichEditor.
+- Solo se aceptan embeds de dominios YouTube permitidos.
+- Se mantiene `preventFileAttachmentPathTampering()` en los campos.
+
+### Tests relacionados
+
+- `tests/Feature/Feature/SeoMetadataTest.php`
+- `tests/Feature/Filament/PostResourceTest.php`
+- `tests/Unit/Support/YouTubeEmbedTest.php`
 
 ### `Tag`
 

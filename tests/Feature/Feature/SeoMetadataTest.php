@@ -31,7 +31,7 @@ it('renders valid json-ld and absolute og image in publicaciones show', function
     expect($decoded['description'])->toContain('comillas');
     expect($decoded['image'])->toBe(url('/storage/covers/publicacion.jpg'));
 
-    $response->assertSee('property="og:image" content="' . e(url('/storage/covers/publicacion.jpg')) . '"', false);
+    $response->assertSee('property="og:image" content="'.e(url('/storage/covers/publicacion.jpg')).'"', false);
 });
 
 it('renders valid json-ld and absolute og image in tutoriales show', function () {
@@ -61,7 +61,7 @@ it('renders valid json-ld and absolute og image in tutoriales show', function ()
     expect($decoded['headline'])->toBe('Guia "Tech" paso a paso');
     expect($decoded['image'])->toBe(url('/storage/covers/tutorial.jpg'));
 
-    $response->assertSee('property="og:image" content="' . e(url('/storage/covers/tutorial.jpg')) . '"', false);
+    $response->assertSee('property="og:image" content="'.e(url('/storage/covers/tutorial.jpg')).'"', false);
 });
 
 it('renders recent post cover image and detail link on home', function () {
@@ -79,8 +79,8 @@ it('renders recent post cover image and detail link on home', function () {
     $response = $this->get(route('home'));
 
     $response->assertSuccessful();
-    $response->assertSee('src="' . e(url('/storage/covers/home-post.jpg')) . '"', false);
-    $response->assertSee('href="' . e(route('publicaciones.show', $post)) . '"', false);
+    $response->assertSee('src="'.e(url('/storage/covers/home-post.jpg')).'"', false);
+    $response->assertSee('href="'.e(route('publicaciones.show', $post)).'"', false);
 });
 
 it('renders sanitized rich html in publicaciones show', function () {
@@ -101,6 +101,60 @@ it('renders sanitized rich html in publicaciones show', function () {
     $response->assertSee('<strong>Contenido</strong>', false);
     $response->assertDontSee('<script>alert("xss")</script>', false);
     $response->assertDontSee('&lt;h2&gt;Subtitulo&lt;/h2&gt;', false);
+});
+
+it('renders youtube token as embedded iframe in publicaciones show', function () {
+    $category = Category::factory()->create([
+        'name' => 'Noticias',
+        'slug' => 'noticias',
+    ]);
+
+    $post = Post::factory()->published()->create([
+        'category_id' => $category->id,
+        'body' => '<p>Intro</p><p>[[youtube:Cn8HBj8QAbk]]</p><p>Outro</p>',
+    ]);
+
+    $response = $this->get(route('publicaciones.show', $post));
+
+    $response->assertSuccessful();
+    $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
+});
+
+it('does not render youtube editor preview block in publicaciones show', function () {
+    $category = Category::factory()->create([
+        'name' => 'Noticias',
+        'slug' => 'noticias',
+    ]);
+
+    $post = Post::factory()->published()->create([
+        'category_id' => $category->id,
+        'body' => '<p>Intro</p><figure class="nmf-youtube-preview"><img src="https://img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg"></figure><p>[[youtube:Cn8HBj8QAbk]]</p>',
+    ]);
+
+    $response = $this->get(route('publicaciones.show', $post));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('nmf-youtube-preview', false);
+    $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
+});
+
+it('does not render youtube editor preview block when class is stripped', function () {
+    $category = Category::factory()->create([
+        'name' => 'Noticias',
+        'slug' => 'noticias',
+    ]);
+
+    $post = Post::factory()->published()->create([
+        'category_id' => $category->id,
+        'body' => '<p>Intro</p><figure><img src="https://img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg" alt="Vista previa de YouTube"><figcaption>Vista previa del video (solo editor)</figcaption></figure><p>[[youtube:Cn8HBj8QAbk]]</p>',
+    ]);
+
+    $response = $this->get(route('publicaciones.show', $post));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg', false);
+    $response->assertDontSee('Vista previa del video (solo editor)', false);
+    $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
 });
 
 it('declares sitemap in robots file', function () {

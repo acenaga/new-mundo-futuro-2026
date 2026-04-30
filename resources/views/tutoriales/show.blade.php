@@ -154,7 +154,7 @@
                 ?
                 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
                 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84]'">
-            {!! str($post->body)->sanitizeHtml() !!}
+            {!! \App\Support\RichContent\RichContentOutput::render($post->renderRichContent('body')) !!}
         </div>
     </div>
 
@@ -192,8 +192,7 @@
                                 class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e8e8ff]'">
                                 @if ($tutorial->cover_image_path)
-                                    <img src="{{ $tutorial->cover_image_url }}"
-                                        alt="{{ $tutorial->title }}"
+                                    <img src="{{ $tutorial->cover_image_url }}" alt="{{ $tutorial->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
                                     <svg class="h-12 w-12 opacity-20"

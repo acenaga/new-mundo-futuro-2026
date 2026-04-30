@@ -109,7 +109,7 @@
                 ?
                 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
                 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#110090]'">
-            {!! str($post->body)->sanitizeHtml() !!}
+            {!! \App\Support\RichContent\RichContentOutput::render($post->renderRichContent('body')) !!}
         </div>
     </div>
 
@@ -146,8 +146,7 @@
                             <div class="flex aspect-video shrink-0 items-center justify-center overflow-hidden"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
                                 @if ($relatedPost->cover_image_path)
-                                    <img src="{{ $relatedPost->cover_image_url }}"
-                                        alt="{{ $relatedPost->title }}"
+                                    <img src="{{ $relatedPost->cover_image_url }}" alt="{{ $relatedPost->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
                                     <svg class="h-10 w-10 opacity-10"
