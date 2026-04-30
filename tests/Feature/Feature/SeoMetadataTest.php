@@ -31,13 +31,13 @@ it('renders valid json-ld and absolute og image in publicaciones show', function
     expect($decoded['description'])->toContain('comillas');
     expect($decoded['image'])->toBe(url('/storage/covers/publicacion.jpg'));
 
-    $response->assertSee('property="og:image" content="'.e(url('/storage/covers/publicacion.jpg')).'"', false);
+    $response->assertSee('property="og:image" content="' . e(url('/storage/covers/publicacion.jpg')) . '"', false);
 });
 
 it('renders valid json-ld and absolute og image in tutoriales show', function () {
     $category = Category::factory()->create([
         'name' => 'Tutoriales',
-        'slug' => 'tutorials',
+        'slug' => 'tutoriales',
     ]);
 
     $post = Post::factory()->published()->create([
@@ -61,7 +61,7 @@ it('renders valid json-ld and absolute og image in tutoriales show', function ()
     expect($decoded['headline'])->toBe('Guia "Tech" paso a paso');
     expect($decoded['image'])->toBe(url('/storage/covers/tutorial.jpg'));
 
-    $response->assertSee('property="og:image" content="'.e(url('/storage/covers/tutorial.jpg')).'"', false);
+    $response->assertSee('property="og:image" content="' . e(url('/storage/covers/tutorial.jpg')) . '"', false);
 });
 
 it('renders recent post cover image and detail link on home', function () {
@@ -79,8 +79,8 @@ it('renders recent post cover image and detail link on home', function () {
     $response = $this->get(route('home'));
 
     $response->assertSuccessful();
-    $response->assertSee('src="'.e(url('/storage/covers/home-post.jpg')).'"', false);
-    $response->assertSee('href="'.e(route('publicaciones.show', $post)).'"', false);
+    $response->assertSee('src="' . e(url('/storage/covers/home-post.jpg')) . '"', false);
+    $response->assertSee('href="' . e(route('publicaciones.show', $post)) . '"', false);
 });
 
 it('renders sanitized rich html in publicaciones show', function () {

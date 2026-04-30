@@ -10,24 +10,28 @@ use Illuminate\Http\Request;
 
 class TutorialController extends Controller
 {
+    private const TUTORIAL_CATEGORY_SLUG = 'tutoriales';
+
     public function index(Request $request): View
     {
         $tagSlug = $request->query('tag');
 
-        $query = Post::whereHas('category', fn ($q) => $q->where('slug', 'tutorials'))
+        $query = Post::whereHas('category', fn($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
             ->where('status', 'published')
             ->with(['tags'])
             ->latest('published_at');
 
         if ($tagSlug) {
-            $query->whereHas('tags', fn ($q) => $q->where('slug', $tagSlug));
+            $query->whereHas('tags', fn($q) => $q->where('slug', $tagSlug));
         }
 
         $tutorials = $query->paginate(12)->withQueryString();
 
-        $tags = Tag::whereHas('posts', fn ($q) => $q
-            ->where('status', 'published')
-            ->whereHas('category', fn ($q2) => $q2->where('slug', 'tutorials'))
+        $tags = Tag::whereHas(
+            'posts',
+            fn($q) => $q
+                ->where('status', 'published')
+                ->whereHas('category', fn($q2) => $q2->where('slug', self::TUTORIAL_CATEGORY_SLUG))
         )->orderBy('name')->get();
 
         return view('tutoriales.index', compact('tutorials', 'tags', 'tagSlug'));
@@ -37,13 +41,13 @@ class TutorialController extends Controller
     {
         abort_unless(
             $post->status === PostStatus::Published &&
-            $post->category?->slug === 'tutorials',
+                $post->category?->slug === self::TUTORIAL_CATEGORY_SLUG,
             404
         );
 
         $post->load(['author', 'category', 'tags']);
 
-        $related = Post::whereHas('category', fn ($q) => $q->where('slug', 'tutorials'))
+        $related = Post::whereHas('category', fn($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
             ->where('id', '!=', $post->id)
             ->where('status', PostStatus::Published)
             ->with(['tags'])

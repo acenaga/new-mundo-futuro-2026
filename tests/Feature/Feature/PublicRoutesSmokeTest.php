@@ -11,7 +11,7 @@ it('serves core public routes', function () {
 
     $tutorialsCategory = Category::factory()->create([
         'name' => 'Tutoriales',
-        'slug' => 'tutorials',
+        'slug' => 'tutoriales',
     ]);
 
     $publicacion = Post::factory()->published()->create([

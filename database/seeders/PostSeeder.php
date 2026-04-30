@@ -23,7 +23,7 @@ class PostSeeder extends Seeder
         });
 
         // ── Categories ───────────────────────────────────────────────────────
-        $tutorialCategory = Category::where('slug', 'tutorials')->firstOrFail();
+        $tutorialCategory = Category::where('slug', 'tutoriales')->firstOrFail();
         $noticiaCategory = Category::where('slug', 'noticias')->firstOrFail();
         $opinionCategory = Category::where('slug', 'opinion')->firstOrFail();
         $analisisCategory = Category::where('slug', 'analisis')->firstOrFail();
@@ -147,7 +147,7 @@ class PostSeeder extends Seeder
                     'title' => $data['title'],
                     'slug' => $slug,
                     'excerpt' => $data['excerpt'],
-                    'body' => $data['excerpt'].' '.str_repeat('Contenido detallado del tutorial. ', 20),
+                    'body' => $data['excerpt'] . ' ' . str_repeat('Contenido detallado del tutorial. ', 20),
                     'cover_image_path' => null,
                     'video_url' => $data['video_url'],
                     'status' => PostStatus::Published,
@@ -156,7 +156,7 @@ class PostSeeder extends Seeder
                 ]
             );
 
-            $postTags = collect($data['tags'])->map(fn ($t) => $tags[$t]->id)->toArray();
+            $postTags = collect($data['tags'])->map(fn($t) => $tags[$t]->id)->toArray();
             $post->tags()->sync($postTags);
         }
 
@@ -335,7 +335,7 @@ class PostSeeder extends Seeder
                     'title' => $data['title'],
                     'slug' => $slug,
                     'excerpt' => $data['excerpt'],
-                    'body' => $data['excerpt'].' '.str_repeat('Contenido del artículo de publicación. ', 20),
+                    'body' => $data['excerpt'] . ' ' . str_repeat('Contenido del artículo de publicación. ', 20),
                     'cover_image_path' => null,
                     'status' => PostStatus::Published,
                     'published_at' => now()->subDays($data['days_ago']),
@@ -343,7 +343,7 @@ class PostSeeder extends Seeder
                 ]
             );
 
-            $postTags = collect($data['tags'])->map(fn ($t) => $tags[$t]->id)->toArray();
+            $postTags = collect($data['tags'])->map(fn($t) => $tags[$t]->id)->toArray();
             $post->tags()->sync($postTags);
         }
     }
