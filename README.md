@@ -52,6 +52,62 @@ php artisan serve
 npm run dev
 ```
 
+## Bootstrap de accesos
+
+La creación de roles base y del usuario `super_admin` ya no depende de `db:seed` para crear usuarios administrativos. Ahora el proyecto tiene dos comandos Artisan dedicados.
+
+### Roles base
+
+Este comando crea de forma idempotente los roles base de la aplicación:
+
+```bash
+php artisan access:create-roles
+```
+
+Roles creados:
+
+- `super_admin`
+- `admin`
+- `tutor`
+- `editor`
+- `student`
+
+La misma lista de roles vive en `database/seeders/RoleSeeder.php`, por lo que el seeder y el comando comparten la misma fuente de verdad.
+
+### Super admin
+
+Este comando crea o actualiza un usuario con rol `super_admin`, verifica su correo si aún no estaba verificado y permite definir la contraseña de forma interactiva o por opciones.
+
+Modo interactivo:
+
+```bash
+php artisan access:create-super-admin
+```
+
+Modo no interactivo:
+
+```bash
+php artisan access:create-super-admin --name="Carlos Ferrer" --email="admin@example.com" --password="tu-password-segura"
+```
+
+Si no envías `--password`, el comando pedirá la contraseña dos veces y fallará si la confirmación no coincide.
+
+### Recomendación para staging y producción
+
+En despliegues, la recomendación es:
+
+```bash
+php artisan access:create-roles
+```
+
+Y luego, solo cuando haga falta crear o actualizar el usuario administrador:
+
+```bash
+php artisan access:create-super-admin
+```
+
+Esto evita dejar credenciales administrativas hardcodeadas en seeders y mantiene el bootstrap de acceso como una operación explícita y segura.
+
 ---
 
 ## Arquitectura del sitio público
