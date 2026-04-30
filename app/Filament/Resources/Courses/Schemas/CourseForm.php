@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\Courses\Schemas;
 
+use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\ImageEditor;
-use App\Models\User;
-use Illuminate\Support\Str;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class CourseForm
 {
@@ -37,6 +37,14 @@ class CourseForm
                 RichEditor::make('description')
                     ->required()
                     ->maxLength(65535)
+                    ->plugins([
+                        YouTubeEmbedRichContentPlugin::make(),
+                    ])
+                    ->enableToolbarButtons([
+                        ['youtubeEmbed'],
+                    ])
+                    ->preventFileAttachmentPathTampering()
+                    ->rule(new OnlyYouTubeEmbeds)
                     ->columnSpanFull(),
                 FileUpload::make('image_path')
                     ->imageEditor()

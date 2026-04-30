@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Enums\PostStatus;
+use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -90,7 +92,15 @@ class PostForm
                             ->maxLength(500),
                         RichEditor::make('body')
                             ->label('Contenido')
-                            ->required(),
+                            ->required()
+                            ->plugins([
+                                YouTubeEmbedRichContentPlugin::make(),
+                            ])
+                            ->enableToolbarButtons([
+                                ['youtubeEmbed'],
+                            ])
+                            ->preventFileAttachmentPathTampering()
+                            ->rule(new OnlyYouTubeEmbeds),
                     ]),
             ]);
     }

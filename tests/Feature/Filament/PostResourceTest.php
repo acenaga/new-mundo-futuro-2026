@@ -177,3 +177,27 @@ test('body is required to create a post', function () {
         ->call('create')
         ->assertHasFormErrors(['body']);
 });
+
+test('body strips non-youtube iframe embeds before persisting', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'title' => 'Body With Invalid Iframe',
+            'slug' => 'body-with-invalid-iframe',
+            'body' => '<p>Contenido</p><iframe src="https://example.com/embed/123"></iframe>',
+            'status' => PostStatus::Draft,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $post = Post::query()
+        ->where('slug', 'body-with-invalid-iframe')
+        ->firstOrFail();
+
+    expect($post->body)->not->toContain('<iframe');
+    expect($post->body)->not->toContain('example.com');
+});
