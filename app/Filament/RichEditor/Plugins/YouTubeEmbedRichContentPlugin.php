@@ -2,6 +2,7 @@
 
 namespace App\Filament\RichEditor\Plugins;
 
+use App\Rules\ValidYouTubeVideo;
 use App\Support\RichContent\YouTubeEmbed;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
@@ -70,11 +71,7 @@ class YouTubeEmbedRichContentPlugin implements RichContentPlugin
                         ->label('URL de YouTube')
                         ->placeholder('https://www.youtube.com/watch?v=Cn8HBj8QAbk')
                         ->required()
-                        ->rule(function (string $attribute, mixed $value, \Closure $fail): void {
-                            if (YouTubeEmbed::extractVideoId(is_string($value) ? $value : null) === null) {
-                                $fail('Ingresa una URL valida de YouTube.');
-                            }
-                        }),
+                        ->rule(new ValidYouTubeVideo),
                 ])
                 ->action(function (array $arguments, array $data, RichEditor $component): void {
                     $videoId = YouTubeEmbed::extractVideoId($data['url'] ?? null);

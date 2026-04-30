@@ -29,3 +29,15 @@ it('removes youtube token and preview block from content', function () {
     expect($updated)->not->toContain('nmf-youtube-preview');
     expect($updated)->not->toContain('[[youtube:Cn8HBj8QAbk]]');
 });
+
+it('extracts video id from youtube watch urls with extra query parameters', function () {
+    $videoId = YouTubeEmbed::extractVideoId('https://www.youtube.com/watch?v=3JcmQONgXJM&list=RDhCPrTciAhMk&index=19');
+
+    expect($videoId)->toBe('3JcmQONgXJM');
+});
+
+it('returns null when youtube url is invalid', function () {
+    $videoId = YouTubeEmbed::extractVideoId('https://example.com/watch?v=3JcmQONgXJM');
+
+    expect($videoId)->toBeNull();
+});
