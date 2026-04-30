@@ -7,14 +7,46 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function () {
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $permissions = [
+        'ViewAny:Post',
+        'View:Post',
+        'Create:Post',
+        'Update:Post',
+        'Delete:Post',
+        'Restore:Post',
+        'ForceDelete:Post',
+        'ForceDeleteAny:Post',
+        'RestoreAny:Post',
+        'Replicate:Post',
+        'Reorder:Post',
+    ];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate([
+            'name' => $permission,
+            'guard_name' => 'web',
+        ]);
+    }
+
     Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
     Role::firstOrCreate(['name' => 'tutor', 'guard_name' => 'web']);
     Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+
+    Role::findByName('admin', 'web')->syncPermissions($permissions);
+    Role::findByName('tutor', 'web')->syncPermissions([
+        'ViewAny:Post',
+        'View:Post',
+        'Create:Post',
+    ]);
 });
 
 test('admin can list posts', function () {
