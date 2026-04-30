@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use Database\Factories\PostFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -27,6 +29,15 @@ class Post extends Model
             'published_at' => 'datetime',
             'allow_comments' => 'boolean',
         ];
+    }
+
+    protected function coverImageUrl(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?string => filled($this->cover_image_path)
+                ? Storage::disk('public')->url($this->cover_image_path)
+                : null,
+        );
     }
 
     public function author(): BelongsTo

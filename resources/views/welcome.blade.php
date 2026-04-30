@@ -190,7 +190,7 @@
                             <div class="flex aspect-video items-center justify-center overflow-hidden rounded-lg"
                                 :class="isDark ? 'bg-[#292934]' : 'bg-[#e8e8ff]'">
                                 @if ($tutorial->cover_image_path)
-                                    <img src="{{ Storage::url($tutorial->cover_image_path) }}"
+                                    <img src="{{ $tutorial->cover_image_url }}"
                                         alt="{{ $tutorial->title }}" class="h-full w-full object-cover">
                                 @else
                                     <svg class="h-12 w-12 opacity-20"
@@ -334,7 +334,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <a href="#" class="font-display text-xs font-semibold transition-colors"
+                                <a href="{{ route('publicaciones.show', $post) }}" class="font-display text-xs font-semibold transition-colors"
                                     :class="isDark ? 'text-[#c1c1ff] hover:text-[#f4bf27]' :
                                         'text-[#110090] hover:text-[#4c2e84]'">
                                     Leer artículo ↓
@@ -345,7 +345,7 @@
                         <div class="flex aspect-video items-center justify-center overflow-hidden rounded-xl sm:aspect-square"
                             :class="isDark ? 'bg-[#1b1b25]' : 'bg-[#eaeaf5]'">
                             @if ($post->cover_image_path)
-                                <img src="{{ Storage::url($post->cover_image_path) }}" alt="{{ $post->title }}"
+                                <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}"
                                     class="h-full w-full object-cover">
                             @else
                                 <svg class="h-12 w-12 opacity-10"

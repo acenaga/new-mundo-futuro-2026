@@ -38,6 +38,8 @@ class PostInfolist
                     ->columnSpanFull(),
                 ImageEntry::make('cover_image_path')
                     ->label('Portada')
+                    ->disk('public')
+                    ->visibility('public')
                     ->placeholder('-'),
                 IconEntry::make('allow_comments')
                     ->label('Comentarios')

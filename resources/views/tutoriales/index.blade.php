@@ -150,7 +150,7 @@
                     <a href="{{ route('tutoriales.show', $featured) }}"
                         class="relative flex aspect-video items-center justify-center overflow-hidden lg:col-span-2 lg:aspect-auto lg:self-stretch"
                         :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
-                        @php $thumb = $youtubeThumb($featured->video_url) ?? ($featured->cover_image_path ? Storage::url($featured->cover_image_path) : null); @endphp
+                        @php $thumb = $youtubeThumb($featured->video_url) ?? $featured->cover_image_url; @endphp
                         @if ($thumb)
                             <img src="{{ $thumb }}" alt="{{ $featured->title }}"
                                 class="h-full w-full object-cover transition-transform duration-500 hover:scale-105">
@@ -186,7 +186,7 @@
                             <a href="{{ route('tutoriales.show', $tutorial) }}"
                                 class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e8e8ff]'">
-                                @php $thumb = $youtubeThumb($tutorial->video_url) ?? ($tutorial->cover_image_path ? Storage::url($tutorial->cover_image_path) : null); @endphp
+                                @php $thumb = $youtubeThumb($tutorial->video_url) ?? $tutorial->cover_image_url; @endphp
                                 @if ($thumb)
                                     <img src="{{ $thumb }}" alt="{{ $tutorial->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">

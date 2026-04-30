@@ -21,6 +21,8 @@ class PostsTable
             ->columns([
                 ImageColumn::make('cover_image_path')
                     ->label('Portada')
+                    ->disk('public')
+                    ->visibility('public')
                     ->defaultImageUrl(null)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')

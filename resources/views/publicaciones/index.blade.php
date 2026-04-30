@@ -182,7 +182,7 @@
                     <div class="flex aspect-video items-center justify-center overflow-hidden lg:col-span-2 lg:aspect-auto lg:self-stretch"
                         :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
                         @if ($featured->cover_image_path)
-                            <img src="{{ Storage::url($featured->cover_image_path) }}"
+                            <img src="{{ $featured->cover_image_url }}"
                                 alt="{{ $featured->title }}" class="h-full w-full object-cover">
                         @else
                             <svg class="h-16 w-16 opacity-10"
@@ -208,7 +208,7 @@
                             <div class="flex aspect-video shrink-0 items-center justify-center overflow-hidden"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
                                 @if ($post->cover_image_path)
-                                    <img src="{{ Storage::url($post->cover_image_path) }}"
+                                    <img src="{{ $post->cover_image_url }}"
                                         alt="{{ $post->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else

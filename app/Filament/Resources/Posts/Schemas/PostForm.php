@@ -55,6 +55,7 @@ class PostForm
                             ->columnSpanFull(),
                         FileUpload::make('cover_image_path')
                             ->label('Imagen de portada')
+                            ->disk('public')
                             ->image()
                             ->imageEditor()
                             ->visibility('public')

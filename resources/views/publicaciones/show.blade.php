@@ -1,4 +1,4 @@
-<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_path ? url(Storage::url($post->cover_image_path)) : null" ogType="article" :canonical="route('publicaciones.show', $post)">
+<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_url" ogType="article" :canonical="route('publicaciones.show', $post)">
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HERO
@@ -94,7 +94,7 @@
     @if ($post->cover_image_path)
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
             <div class="shadow-ambient -mt-8 overflow-hidden rounded-2xl">
-                <img src="{{ Storage::url($post->cover_image_path) }}" alt="{{ $post->title }}"
+                <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}"
                     class="h-64 w-full object-cover lg:h-96">
             </div>
         </div>
@@ -109,7 +109,7 @@
                 ?
                 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
                 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#110090]'">
-            {!! nl2br(e($post->body)) !!}
+            {!! str($post->body)->sanitizeHtml() !!}
         </div>
     </div>
 
@@ -146,7 +146,7 @@
                             <div class="flex aspect-video shrink-0 items-center justify-center overflow-hidden"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e0e0f0]'">
                                 @if ($relatedPost->cover_image_path)
-                                    <img src="{{ Storage::url($relatedPost->cover_image_path) }}"
+                                    <img src="{{ $relatedPost->cover_image_url }}"
                                         alt="{{ $relatedPost->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
@@ -227,8 +227,8 @@
                     'url' => route('publicaciones.show', $post),
                 ];
 
-                if ($post->cover_image_path) {
-                    $jsonLd['image'] = url(Storage::url($post->cover_image_path));
+                if ($post->cover_image_url) {
+                    $jsonLd['image'] = $post->cover_image_url;
                 }
             @endphp
             {!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

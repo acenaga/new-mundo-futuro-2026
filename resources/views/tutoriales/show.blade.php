@@ -1,4 +1,4 @@
-<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_path ? url(Storage::url($post->cover_image_path)) : null" ogType="article" :canonical="route('tutoriales.show', $post)">
+<x-layouts.public :title="$post->title . ' — ' . config('app.name')" :description="$post->excerpt" :ogImage="$post->cover_image_url" ogType="article" :canonical="route('tutoriales.show', $post)">
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HERO
@@ -115,7 +115,7 @@
                 </div>
             @elseif ($post->cover_image_path)
                 <div class="relative">
-                    <img src="{{ Storage::url($post->cover_image_path) }}" alt="{{ $post->title }}"
+                    <img src="{{ $post->cover_image_url }}" alt="{{ $post->title }}"
                         class="h-64 w-full object-cover lg:h-[420px]">
                     <div class="absolute inset-0 flex items-center justify-center">
                         <div class="flex h-20 w-20 items-center justify-center rounded-full bg-[#f4bf27]/90 shadow-2xl">
@@ -154,7 +154,7 @@
                 ?
                 'text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]' :
                 'text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84]'">
-            {!! nl2br(e($post->body)) !!}
+            {!! str($post->body)->sanitizeHtml() !!}
         </div>
     </div>
 
@@ -192,7 +192,7 @@
                                 class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg"
                                 :class="isDark ? 'bg-[#21212d]' : 'bg-[#e8e8ff]'">
                                 @if ($tutorial->cover_image_path)
-                                    <img src="{{ Storage::url($tutorial->cover_image_path) }}"
+                                    <img src="{{ $tutorial->cover_image_url }}"
                                         alt="{{ $tutorial->title }}"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
@@ -277,8 +277,8 @@
                     'url' => route('tutoriales.show', $post),
                 ];
 
-                if ($post->cover_image_path) {
-                    $jsonLd['image'] = url(Storage::url($post->cover_image_path));
+                if ($post->cover_image_url) {
+                    $jsonLd['image'] = $post->cover_image_url;
                 }
             @endphp
             {!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
