@@ -76,12 +76,6 @@ class YouTubeEmbedRichContentPlugin implements RichContentPlugin
                 ->action(function (array $arguments, array $data, RichEditor $component): void {
                     $videoId = YouTubeEmbed::extractVideoId($data['url'] ?? null);
 
-                    if ($videoId === null) {
-                        throw ValidationException::withMessages([
-                            'url' => 'Ingresa una URL valida de YouTube.',
-                        ]);
-                    }
-
                     $component->runCommands(
                         [
                             EditorCommand::make('insertContent', [
@@ -97,21 +91,17 @@ class YouTubeEmbedRichContentPlugin implements RichContentPlugin
                     TextInput::make('current_url')
                         ->label('Video actual (URL o ID)')
                         ->placeholder('https://www.youtube.com/watch?v=Cn8HBj8QAbk')
-                        ->required(),
+                        ->required()
+                        ->rule(new ValidYouTubeVideo),
                     TextInput::make('new_url')
                         ->label('Nuevo video (URL o ID)')
                         ->placeholder('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-                        ->required(),
+                        ->required()
+                        ->rule(new ValidYouTubeVideo),
                 ])
                 ->action(function (array $data, RichEditor $component): void {
                     $fromVideoId = YouTubeEmbed::extractVideoId($data['current_url'] ?? null);
                     $toVideoId = YouTubeEmbed::extractVideoId($data['new_url'] ?? null);
-
-                    if (($fromVideoId === null) || ($toVideoId === null)) {
-                        throw ValidationException::withMessages([
-                            'current_url' => 'Ingresa videos validos de YouTube para actualizar.',
-                        ]);
-                    }
 
                     $currentContent = (string) ($component->getState() ?? '');
                     $updatedContent = YouTubeEmbed::replaceInContent($currentContent, $fromVideoId, $toVideoId);
@@ -130,16 +120,11 @@ class YouTubeEmbedRichContentPlugin implements RichContentPlugin
                     TextInput::make('url')
                         ->label('Video a quitar (URL o ID)')
                         ->placeholder('https://www.youtube.com/watch?v=Cn8HBj8QAbk')
-                        ->required(),
+                        ->required()
+                        ->rule(new ValidYouTubeVideo),
                 ])
                 ->action(function (array $data, RichEditor $component): void {
                     $videoId = YouTubeEmbed::extractVideoId($data['url'] ?? null);
-
-                    if ($videoId === null) {
-                        throw ValidationException::withMessages([
-                            'url' => 'Ingresa una URL valida de YouTube.',
-                        ]);
-                    }
 
                     $currentContent = (string) ($component->getState() ?? '');
                     $updatedContent = YouTubeEmbed::removeFromContent($currentContent, $videoId);

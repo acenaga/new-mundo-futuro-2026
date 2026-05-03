@@ -39,38 +39,6 @@ class RichContentOutput
             $cleaned = $html;
         }
 
-        $cleaned = preg_replace(
-            '/<figure[^>]*>.*?<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>.*?(?:<figcaption[^>]*>.*?solo editor.*?<\/figcaption>)?.*?<\/figure>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            $cleaned = $html;
-        }
-
-        $cleaned = preg_replace(
-            '/<p>\s*<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>\s*<\/p>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            return $html;
-        }
-
-        $cleaned = preg_replace(
-            '/<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            return $html;
-        }
-
-        $cleaned = str_replace('Vista previa del video (solo editor)', '', $cleaned);
-
         return $cleaned;
     }
 }

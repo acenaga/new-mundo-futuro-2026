@@ -138,25 +138,6 @@ it('does not render youtube editor preview block in publicaciones show', functio
     $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
 });
 
-it('does not render youtube editor preview block when class is stripped', function () {
-    $category = Category::factory()->create([
-        'name' => 'Noticias',
-        'slug' => 'noticias',
-    ]);
-
-    $post = Post::factory()->published()->create([
-        'category_id' => $category->id,
-        'body' => '<p>Intro</p><figure><img src="https://img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg" alt="Vista previa de YouTube"><figcaption>Vista previa del video (solo editor)</figcaption></figure><p>[[youtube:Cn8HBj8QAbk]]</p>',
-    ]);
-
-    $response = $this->get(route('publicaciones.show', $post));
-
-    $response->assertSuccessful();
-    $response->assertDontSee('img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg', false);
-    $response->assertDontSee('Vista previa del video (solo editor)', false);
-    $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
-});
-
 it('declares sitemap in robots file', function () {
     $robots = file_get_contents(public_path('robots.txt'));
 
