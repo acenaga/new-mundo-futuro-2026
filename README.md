@@ -398,10 +398,31 @@ Vistas públicas que usan este flujo:
 - Solo se aceptan embeds de dominios YouTube permitidos.
 - Se mantiene `preventFileAttachmentPathTampering()` en los campos.
 
+### Mantenimiento de adjuntos
+
+Cuando un editor sube una imagen al RichEditor pero cierra el navegador sin guardar, el archivo queda registrado en la tabla `media` sin referencia en el contenido. Para limpiarlos:
+
+```bash
+# Inspeccionar sin borrar
+php artisan media:cleanup-orphans --dry-run
+
+# Eliminar huérfanos
+php artisan media:cleanup-orphans
+```
+
+El comando también se ejecuta automáticamente cada semana vía el scheduler de Laravel. Para activar el scheduler en producción:
+
+```bash
+* * * * * php /ruta/al/proyecto/artisan schedule:run >> /dev/null 2>&1
+```
+
+> El comando `media-library:clean` de Spatie (incluido en el paquete) cubre el caso de adjuntos cuyos modelos fueron eliminados. Ambos comandos son complementarios.
+
 ### Tests relacionados
 
 - `tests/Feature/Feature/SeoMetadataTest.php`
 - `tests/Feature/Filament/PostResourceTest.php`
+- `tests/Feature/CleanupOrphanedMediaCommandTest.php`
 - `tests/Unit/Support/YouTubeEmbedTest.php`
 
 ### `Tag`
