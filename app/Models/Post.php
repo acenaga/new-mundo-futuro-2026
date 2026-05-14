@@ -67,7 +67,7 @@ class Post extends Model implements HasMedia, HasRichContent
     {
         return Attribute::get(
             fn (): ?string => filled($this->cover_image_path)
-                ? Storage::disk('public')->url($this->cover_image_path)
+                ? url(Storage::disk('public')->url($this->cover_image_path))
                 : null,
         );
     }

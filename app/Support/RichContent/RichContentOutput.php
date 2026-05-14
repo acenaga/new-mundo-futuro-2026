@@ -2,6 +2,8 @@
 
 namespace App\Support\RichContent;
 
+use Illuminate\Support\Str;
+
 class RichContentOutput
 {
     public static function render(string $html): string
@@ -24,7 +26,9 @@ class RichContentOutput
             $withParagraphTokens,
         );
 
-        return is_string($withInlineTokens) ? $withInlineTokens : $withParagraphTokens;
+        $renderedHtml = is_string($withInlineTokens) ? $withInlineTokens : $withParagraphTokens;
+
+        return self::normalizePublicStorageUrls($renderedHtml);
     }
 
     private static function stripEditorPreviewBlocks(string $html): string
@@ -40,5 +44,28 @@ class RichContentOutput
         }
 
         return $cleaned;
+    }
+
+    private static function normalizePublicStorageUrls(string $html): string
+    {
+        if (! app()->bound('request')) {
+            return $html;
+        }
+
+        $rootUrl = rtrim(url('/'), '/');
+
+        return preg_replace_callback(
+            '/https?:\/\/[^"\']+\/storage\/[^"\']+/i',
+            function (array $matches) use ($rootUrl): string {
+                $path = parse_url($matches[0], PHP_URL_PATH);
+
+                if (! is_string($path) || ! Str::startsWith($path, '/storage/')) {
+                    return $matches[0];
+                }
+
+                return $rootUrl.$path;
+            },
+            $html,
+        ) ?? $html;
     }
 }

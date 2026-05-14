@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\Post;
+use Illuminate\Support\Facades\URL;
 
 it('renders valid json-ld and absolute og image in publicaciones show', function () {
     $category = Category::factory()->create([
@@ -118,6 +119,30 @@ it('renders youtube token as embedded iframe in publicaciones show', function ()
 
     $response->assertSuccessful();
     $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
+});
+
+it('renders post images using the current request host even if app url is localhost', function () {
+    config()->set('app.url', 'http://localhost');
+    URL::forceRootUrl('https://new-mundo-futuro-2026.test');
+    URL::forceScheme('https');
+
+    $category = Category::factory()->create([
+        'name' => 'Noticias',
+        'slug' => 'noticias',
+    ]);
+
+    $post = Post::factory()->published()->create([
+        'category_id' => $category->id,
+        'cover_image_path' => 'covers/host-aware-cover.jpg',
+        'body' => '<p><img src="http://localhost/storage/body/host-aware-inline.jpg" alt="inline"></p>',
+    ]);
+
+    $response = $this->get(route('publicaciones.show', $post, false));
+
+    $response->assertSuccessful();
+    $response->assertSee('src="https://new-mundo-futuro-2026.test/storage/covers/host-aware-cover.jpg"', false);
+    $response->assertSee('src="https://new-mundo-futuro-2026.test/storage/body/host-aware-inline.jpg"', false);
+    $response->assertDontSee('src="http://localhost/storage/body/host-aware-inline.jpg"', false);
 });
 
 it('does not render youtube editor preview block in publicaciones show', function () {
