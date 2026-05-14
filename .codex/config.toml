@@ -6,11 +6,10 @@ cwd = "C:\\laragon\\www\\new-mundo-futuro-2026"
 
 [mcp_servers.herd.env]
 SITE_PATH = "C:\\laragon\\www\\new-mundo-futuro-2026"
-
 [mcp_servers.laravel-boost]
 command = "php"
 args = ["artisan", "boost:mcp"]
-cwd = "/Users/acenaga/Herd/new-mundo-futuro"
+cwd = "C:\\laragon\\www\\new-mundo-futuro-2026"
 
 [mcp_servers.nightwatch]
 command = "npx"
