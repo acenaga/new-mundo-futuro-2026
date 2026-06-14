@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Support\RichContent\YouTubeEmbed;
 use Database\Factories\PostFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
@@ -72,6 +73,33 @@ class Post extends Model implements HasMedia, HasRichContent
                 ? url(Storage::disk('public')->url($this->cover_image_path))
                 : null,
         );
+    }
+
+    protected function readingTime(): Attribute
+    {
+        return Attribute::get(function (): int {
+            $words = str_word_count(strip_tags($this->body ?? ''));
+
+            return (int) max(1, ceil($words / 200));
+        });
+    }
+
+    protected function youtubeThumbnailUrl(): Attribute
+    {
+        return Attribute::get(function (): ?string {
+            $videoId = YouTubeEmbed::extractVideoId($this->video_url);
+
+            return $videoId ? "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg" : null;
+        });
+    }
+
+    protected function youtubeEmbedUrl(): Attribute
+    {
+        return Attribute::get(function (): ?string {
+            $videoId = YouTubeEmbed::extractVideoId($this->video_url);
+
+            return $videoId ? "https://www.youtube.com/embed/{$videoId}" : null;
+        });
     }
 
     public function author(): BelongsTo

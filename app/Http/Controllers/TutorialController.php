@@ -50,7 +50,7 @@ class TutorialController extends Controller
             ->get();
 
         return view('tutoriales.show', [
-            'post' => $tutorial,
+            'tutorial' => $tutorial,
             'related' => $related,
         ]);
     }
