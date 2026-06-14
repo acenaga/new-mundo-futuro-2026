@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PostStatus;
+use App\Models\Article;
 use App\Models\Category;
-use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -18,8 +18,7 @@ class PostController extends Controller
         $categorySlug = $request->query('categoria');
         $tagSlug = $request->query('tag');
 
-        $query = Post::whereHas('category', fn ($q) => $q->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
-            ->where('status', PostStatus::Published)
+        $query = Article::where('status', PostStatus::Published)
             ->with(['author', 'category', 'tags'])
             ->latest('published_at');
 
@@ -47,20 +46,23 @@ class PostController extends Controller
         return view('publicaciones.index', compact('posts', 'categories', 'categorySlug', 'tags', 'tagSlug'));
     }
 
-    public function show(Post $post): View
+    public function show(Article $article): View
     {
-        abort_unless($post->status === PostStatus::Published, 404);
+        abort_unless($article->status === PostStatus::Published, 404);
 
-        $post->load(['author', 'category', 'tags']);
+        $article->load(['author', 'category', 'tags']);
 
-        $related = Post::where('category_id', $post->category_id)
-            ->where('id', '!=', $post->id)
+        $related = Article::where('category_id', $article->category_id)
+            ->where('id', '!=', $article->id)
             ->where('status', PostStatus::Published)
             ->with(['author', 'category', 'tags'])
             ->latest('published_at')
             ->limit(3)
             ->get();
 
-        return view('publicaciones.show', compact('post', 'related'));
+        return view('publicaciones.show', [
+            'post' => $article,
+            'related' => $related,
+        ]);
     }
 }

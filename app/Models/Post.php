@@ -26,6 +26,8 @@ class Post extends Model implements HasMedia, HasRichContent
     use InteractsWithMedia;
     use InteractsWithRichContent;
 
+    protected $table = 'posts';
+
     protected $fillable = [
         'user_id',
         'category_id',
@@ -84,11 +86,16 @@ class Post extends Model implements HasMedia, HasRichContent
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class);
+        return $this->belongsToMany(Tag::class, 'post_tag', 'post_id', 'tag_id');
     }
 
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function getMorphClass(): string
+    {
+        return self::class;
     }
 }

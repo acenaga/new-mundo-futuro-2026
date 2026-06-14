@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PostStatus;
-use App\Models\Post;
 use App\Models\Tag;
+use App\Models\Tutorial;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -16,8 +16,7 @@ class TutorialController extends Controller
     {
         $tagSlug = $request->query('tag');
 
-        $query = Post::whereHas('category', fn ($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
-            ->where('status', PostStatus::Published)
+        $query = Tutorial::where('status', PostStatus::Published)
             ->with(['tags'])
             ->latest('published_at');
 
@@ -37,24 +36,22 @@ class TutorialController extends Controller
         return view('tutoriales.index', compact('tutorials', 'tags', 'tagSlug'));
     }
 
-    public function show(Post $post): View
+    public function show(Tutorial $tutorial): View
     {
-        $post->loadMissing(['author', 'category', 'tags']);
+        $tutorial->loadMissing(['author', 'category', 'tags']);
 
-        abort_unless(
-            $post->status === PostStatus::Published &&
-                $post->category?->slug === self::TUTORIAL_CATEGORY_SLUG,
-            404
-        );
+        abort_unless($tutorial->status === PostStatus::Published, 404);
 
-        $related = Post::whereHas('category', fn ($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
-            ->where('id', '!=', $post->id)
+        $related = Tutorial::where('id', '!=', $tutorial->id)
             ->where('status', PostStatus::Published)
             ->with(['tags'])
             ->latest('published_at')
             ->limit(3)
             ->get();
 
-        return view('tutoriales.show', compact('post', 'related'));
+        return view('tutoriales.show', [
+            'post' => $tutorial,
+            'related' => $related,
+        ]);
     }
 }
