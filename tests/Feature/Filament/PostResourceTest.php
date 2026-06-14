@@ -110,7 +110,7 @@ test('admin can create an article', function () {
 test('admin can create a tutorial', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
-    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
 
     $this->actingAs($admin);
 
@@ -178,7 +178,7 @@ test('admin cannot create a tutorial with non-tutorial category', function () {
 test('admin cannot create an article with tutoriales category', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
-    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales']);
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
 
     $this->actingAs($admin);
 

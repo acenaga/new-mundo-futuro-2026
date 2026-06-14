@@ -41,8 +41,11 @@ class Post extends Model implements HasMedia, HasRichContent
             if ($isTutorial) {
                 $post->type = PostType::Tutorial;
 
-                $tutorialCategory = Category::where('slug', 'tutoriales')->first()
-                    ?? Category::create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+                $tutorialCategory = Category::where('slug', 'tutoriales')->first();
+
+                if (! $tutorialCategory) {
+                    throw new \RuntimeException('La categoría obligatoria "tutoriales" no existe en la base de datos. Por favor, ejecuta las migraciones o seeders.');
+                }
 
                 if ($post->category_id !== null && (int) $post->category_id !== (int) $tutorialCategory->id) {
                     throw new \InvalidArgumentException('Un tutorial solo puede tener la categoría "Tutoriales".');

@@ -16,8 +16,11 @@ class TutorialFactory extends PostFactory
     public function configure(): static
     {
         return $this->afterCreating(function (Tutorial $tutorial) {
-            $category = Category::where('slug', 'tutoriales')->first()
-                ?? Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+            $category = Category::where('slug', 'tutoriales')->first();
+
+            if (! $category) {
+                throw new \RuntimeException('La categoría obligatoria "tutoriales" no existe en la base de datos.');
+            }
 
             $tutorial->category()->associate($category);
             $tutorial->saveQuietly();

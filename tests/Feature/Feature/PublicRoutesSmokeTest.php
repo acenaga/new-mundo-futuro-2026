@@ -9,10 +9,10 @@ it('serves core public routes', function () {
         'slug' => 'noticias',
     ]);
 
-    $tutorialsCategory = Category::factory()->create([
-        'name' => 'Tutoriales',
-        'slug' => 'tutoriales',
-    ]);
+    $tutorialsCategory = Category::firstOrCreate(
+        ['slug' => 'tutoriales'],
+        ['name' => 'Tutoriales']
+    );
 
     $publicacion = Post::factory()->published()->create([
         'category_id' => $newsCategory->id,

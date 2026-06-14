@@ -36,10 +36,10 @@ it('renders valid json-ld and absolute og image in publicaciones show', function
 });
 
 it('renders valid json-ld and absolute og image in tutoriales show', function () {
-    $category = Category::factory()->create([
-        'name' => 'Tutoriales',
-        'slug' => 'tutoriales',
-    ]);
+    $category = Category::firstOrCreate(
+        ['slug' => 'tutoriales'],
+        ['name' => 'Tutoriales']
+    );
 
     $post = Post::factory()->tutorial()->published()->create([
         'category_id' => $category->id,

@@ -103,7 +103,7 @@ it('resolves route model binding correctly for Tutorial', function () {
 });
 
 it('enforces tutorial has tutoriales category at model level', function () {
-    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
 
     $tutorial = Tutorial::create([
         'user_id' => User::factory()->create()->id,
@@ -128,7 +128,7 @@ it('throws exception when tutorial is created with non-tutoriales category', fun
 });
 
 it('throws exception when article is created with tutoriales category', function () {
-    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales']);
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
 
     expect(fn () => Article::create([
         'user_id' => User::factory()->create()->id,
