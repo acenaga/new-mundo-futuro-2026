@@ -53,6 +53,7 @@ class PostFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => PostType::Tutorial,
+            'category_id' => null,
         ]);
     }
 }

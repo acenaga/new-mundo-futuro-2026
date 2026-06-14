@@ -28,6 +28,43 @@ class Post extends Model implements HasMedia, HasRichContent
     use InteractsWithMedia;
     use InteractsWithRichContent;
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Post $post) {
+            $isTutorial = $post instanceof Tutorial || $post->type === PostType::Tutorial;
+            $isArticle = $post instanceof Article || $post->type === PostType::Article;
+
+            // Enforce category invariance for Tutorial type
+            if ($isTutorial) {
+                $post->type = PostType::Tutorial;
+
+                $tutorialCategory = Category::where('slug', 'tutoriales')->first()
+                    ?? Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+                if ($post->category_id !== null && (int) $post->category_id !== (int) $tutorialCategory->id) {
+                    throw new \InvalidArgumentException('Un tutorial solo puede tener la categoría "Tutoriales".');
+                }
+
+                $post->category_id = $tutorialCategory->id;
+            }
+
+            // Enforce category invariance for Article type
+            if ($isArticle) {
+                $post->type = PostType::Article;
+
+                if ($post->category_id !== null) {
+                    $tutorialCategory = Category::where('slug', 'tutoriales')->first();
+                    if ($tutorialCategory && (int) $post->category_id === (int) $tutorialCategory->id) {
+                        throw new \InvalidArgumentException('Un artículo no puede tener la categoría "Tutoriales".');
+                    }
+                }
+            }
+        });
+    }
+
     protected $table = 'posts';
 
     protected $fillable = [

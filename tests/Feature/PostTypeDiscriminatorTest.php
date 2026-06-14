@@ -2,6 +2,7 @@
 
 use App\Enums\PostType;
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tutorial;
 use App\Models\User;
@@ -99,4 +100,41 @@ it('resolves route model binding correctly for Tutorial', function () {
 
     $this->get(route('tutoriales.show', $article))
         ->assertNotFound();
+});
+
+it('enforces tutorial has tutoriales category at model level', function () {
+    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+    $tutorial = Tutorial::create([
+        'user_id' => User::factory()->create()->id,
+        'title' => 'Tutorial Category Check',
+        'slug' => 'tutorial-category-check',
+        'body' => 'Test body',
+    ]);
+
+    expect($tutorial->category_id)->toBe($tutorialCategory->id);
+});
+
+it('throws exception when tutorial is created with non-tutoriales category', function () {
+    $regularCategory = Category::factory()->create(['slug' => 'noticias']);
+
+    expect(fn () => Tutorial::create([
+        'user_id' => User::factory()->create()->id,
+        'title' => 'Tutorial Wrong Category',
+        'slug' => 'tutorial-wrong-category',
+        'body' => 'Test body',
+        'category_id' => $regularCategory->id,
+    ]))->toThrow(InvalidArgumentException::class);
+});
+
+it('throws exception when article is created with tutoriales category', function () {
+    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales']);
+
+    expect(fn () => Article::create([
+        'user_id' => User::factory()->create()->id,
+        'title' => 'Article Wrong Category',
+        'slug' => 'article-wrong-category',
+        'body' => 'Test body',
+        'category_id' => $tutorialCategory->id,
+    ]))->toThrow(InvalidArgumentException::class);
 });

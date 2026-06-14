@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Tutorial extends Post
 {
-    /**
-     * The "booted" method of the model.
-     */
     protected static function booted(): void
     {
+        parent::booted();
+
         static::addGlobalScope('tutorial', function (Builder $builder) {
             $builder->where('type', PostType::Tutorial);
         });
