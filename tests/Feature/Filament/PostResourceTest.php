@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Models\Category;
@@ -200,4 +201,86 @@ test('body strips non-youtube iframe embeds before persisting', function () {
 
     expect($post->body)->not->toContain('<iframe');
     expect($post->body)->not->toContain('example.com');
+});
+
+test('validation prevents assigning tutorial category to article post type', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Article Title',
+            'slug' => 'article-title',
+            'body' => 'Article body content',
+            'status' => PostStatus::Draft,
+            'type' => PostType::Article,
+            'category_id' => $tutorialCategory->id,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['category_id']);
+});
+
+test('validation prevents assigning non-tutorial category to tutorial post type', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $regularCategory = Category::factory()->create(['slug' => 'noticias', 'name' => 'Noticias']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Tutorial Title',
+            'slug' => 'tutorial-title',
+            'body' => 'Tutorial body content',
+            'status' => PostStatus::Draft,
+            'type' => PostType::Tutorial,
+            'category_id' => $regularCategory->id,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['category_id']);
+});
+
+test('selecting tutorial type automatically sets category to tutoriales', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'type' => PostType::Article,
+            'category_id' => null,
+        ])
+        ->set('data.type', PostType::Tutorial->value)
+        ->assertFormSet([
+            'category_id' => $tutorialCategory->id,
+        ]);
+});
+
+test('selecting article type automatically clears category if it was tutoriales', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $tutorialCategory = Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreatePost::class)
+        ->fillForm([
+            'type' => PostType::Tutorial,
+            'category_id' => $tutorialCategory->id,
+        ])
+        ->set('data.type', PostType::Article->value)
+        ->assertFormSet([
+            'category_id' => null,
+        ]);
 });
