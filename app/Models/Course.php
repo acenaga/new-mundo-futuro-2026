@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CourseStatus;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use Database\Factories\CourseFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
@@ -33,6 +34,14 @@ class Course extends Model implements HasMedia, HasRichContent
         'status',
         'is_premium',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => CourseStatus::class,
+            'is_premium' => 'boolean',
+        ];
+    }
 
     public function setUpRichContent(): void
     {

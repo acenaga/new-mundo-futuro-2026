@@ -31,6 +31,13 @@ class CleanupOrphanedMediaCommand extends Command
             $model = $item->model;
 
             if (! $model) {
+                $this->line("Huérfano (Modelo no existe): [{$item->model_type}#{$item->model_id}] {$item->file_name} ({$item->uuid})");
+                $count++;
+
+                if (! $dryRun) {
+                    $item->delete();
+                }
+
                 continue;
             }
 

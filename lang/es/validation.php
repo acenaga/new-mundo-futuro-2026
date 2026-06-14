@@ -155,6 +155,10 @@ return [
     'ulid' => 'El campo :attribute debe ser un ULID válido.',
     'uuid' => 'El campo :attribute debe ser un UUID válido.',
 
+    'only_youtube_embeds' => 'Solo se permiten iframes de YouTube en el contenido.',
+    'youtube_embed_invalid' => 'El identificador de video de YouTube no es válido.',
+    'valid_youtube_video' => 'Ingresa una URL válida de YouTube.',
+
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'mensaje-personalizado',

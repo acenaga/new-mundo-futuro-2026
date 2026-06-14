@@ -18,17 +18,17 @@ class PostController extends Controller
         $categorySlug = $request->query('categoria');
         $tagSlug = $request->query('tag');
 
-        $query = Post::whereHas('category', fn($q) => $q->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
-            ->where('status', 'published')
+        $query = Post::whereHas('category', fn ($q) => $q->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
+            ->where('status', PostStatus::Published)
             ->with(['author', 'category', 'tags'])
             ->latest('published_at');
 
         if ($categorySlug) {
-            $query->whereHas('category', fn($q) => $q->where('slug', $categorySlug));
+            $query->whereHas('category', fn ($q) => $q->where('slug', $categorySlug));
         }
 
         if ($tagSlug) {
-            $query->whereHas('tags', fn($q) => $q->where('slug', $tagSlug));
+            $query->whereHas('tags', fn ($q) => $q->where('slug', $tagSlug));
         }
 
         $posts = $query->paginate(10)->withQueryString();
@@ -39,9 +39,9 @@ class PostController extends Controller
 
         $tags = Tag::whereHas(
             'posts',
-            fn($q) => $q
-                ->where('status', 'published')
-                ->whereHas('category', fn($q2) => $q2->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
+            fn ($q) => $q
+                ->where('status', PostStatus::Published)
+                ->whereHas('category', fn ($q2) => $q2->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
         )->orderBy('name')->get();
 
         return view('publicaciones.index', compact('posts', 'categories', 'categorySlug', 'tags', 'tagSlug'));

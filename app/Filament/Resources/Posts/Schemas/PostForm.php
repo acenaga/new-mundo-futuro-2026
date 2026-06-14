@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -31,8 +32,8 @@ class PostForm
                             ->relationship('author', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(fn() => auth()->id())
-                            ->visible(fn() => auth()->user()?->hasRole('admin'))
+                            ->default(fn () => auth()->id())
+                            ->visible(fn () => auth()->user()?->hasRole('admin'))
                             ->required(),
                         Select::make('category_id')
                             ->label('Categoría')
@@ -79,7 +80,7 @@ class PostForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Set $set) => $set('slug', Str::slug($state))),
                         TextInput::make('slug')
                             ->required()
                             ->disabled()

@@ -16,22 +16,22 @@ class TutorialController extends Controller
     {
         $tagSlug = $request->query('tag');
 
-        $query = Post::whereHas('category', fn($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
-            ->where('status', 'published')
+        $query = Post::whereHas('category', fn ($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
+            ->where('status', PostStatus::Published)
             ->with(['tags'])
             ->latest('published_at');
 
         if ($tagSlug) {
-            $query->whereHas('tags', fn($q) => $q->where('slug', $tagSlug));
+            $query->whereHas('tags', fn ($q) => $q->where('slug', $tagSlug));
         }
 
         $tutorials = $query->paginate(12)->withQueryString();
 
         $tags = Tag::whereHas(
             'posts',
-            fn($q) => $q
-                ->where('status', 'published')
-                ->whereHas('category', fn($q2) => $q2->where('slug', self::TUTORIAL_CATEGORY_SLUG))
+            fn ($q) => $q
+                ->where('status', PostStatus::Published)
+                ->whereHas('category', fn ($q2) => $q2->where('slug', self::TUTORIAL_CATEGORY_SLUG))
         )->orderBy('name')->get();
 
         return view('tutoriales.index', compact('tutorials', 'tags', 'tagSlug'));
@@ -39,15 +39,15 @@ class TutorialController extends Controller
 
     public function show(Post $post): View
     {
+        $post->loadMissing(['author', 'category', 'tags']);
+
         abort_unless(
             $post->status === PostStatus::Published &&
                 $post->category?->slug === self::TUTORIAL_CATEGORY_SLUG,
             404
         );
 
-        $post->load(['author', 'category', 'tags']);
-
-        $related = Post::whereHas('category', fn($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
+        $related = Post::whereHas('category', fn ($q) => $q->where('slug', self::TUTORIAL_CATEGORY_SLUG))
             ->where('id', '!=', $post->id)
             ->where('status', PostStatus::Published)
             ->with(['tags'])
