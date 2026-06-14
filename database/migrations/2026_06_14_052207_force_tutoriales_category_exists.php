@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::table('categories')->where('slug', 'tutoriales')->delete();
+        // No se elimina la categoría para evitar pérdida de datos en producción y rotura de claves foráneas.
     }
 };
