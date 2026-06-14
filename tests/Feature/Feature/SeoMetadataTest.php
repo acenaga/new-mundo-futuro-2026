@@ -41,7 +41,7 @@ it('renders valid json-ld and absolute og image in tutoriales show', function ()
         'slug' => 'tutoriales',
     ]);
 
-    $post = Post::factory()->published()->create([
+    $post = Post::factory()->tutorial()->published()->create([
         'category_id' => $category->id,
         'title' => 'Guia "Tech" paso a paso',
         'excerpt' => 'Descripcion con "escape" seguro',

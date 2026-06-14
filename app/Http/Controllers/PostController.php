@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    private const TUTORIAL_CATEGORY_SLUG = 'tutoriales';
-
     public function index(Request $request): View
     {
         $categorySlug = $request->query('categoria');
@@ -32,7 +30,7 @@ class PostController extends Controller
 
         $posts = $query->paginate(10)->withQueryString();
 
-        $categories = Category::where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG)
+        $categories = Category::whereHas('posts', fn ($q) => $q->where('type', 'article'))
             ->orderBy('name')
             ->get();
 
@@ -40,7 +38,7 @@ class PostController extends Controller
             'posts',
             fn ($q) => $q
                 ->where('status', PostStatus::Published)
-                ->whereHas('category', fn ($q2) => $q2->where('slug', '!=', self::TUTORIAL_CATEGORY_SLUG))
+                ->where('type', 'article')
         )->orderBy('name')->get();
 
         return view('publicaciones.index', compact('posts', 'categories', 'categorySlug', 'tags', 'tagSlug'));

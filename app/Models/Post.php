@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Support\RichContent\YouTubeEmbed;
 use Database\Factories\PostFactory;
@@ -32,6 +33,7 @@ class Post extends Model implements HasMedia, HasRichContent
     protected $fillable = [
         'user_id',
         'category_id',
+        'type',
         'title',
         'slug',
         'excerpt',
@@ -46,10 +48,40 @@ class Post extends Model implements HasMedia, HasRichContent
     protected function casts(): array
     {
         return [
+            'type' => PostType::class,
             'status' => PostStatus::class,
             'published_at' => 'datetime',
             'allow_comments' => 'boolean',
         ];
+    }
+
+    /**
+     * Resolve the correct subclass when hydrating from the database (STI).
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function newFromBuilder($attributes = [], $connection = null): static
+    {
+        $attributes = (array) $attributes;
+
+        $type = $attributes['type'] ?? null;
+
+        $class = match ($type) {
+            PostType::Article->value, PostType::Article => Article::class,
+            PostType::Tutorial->value, PostType::Tutorial => Tutorial::class,
+            default => static::class,
+        };
+
+        if ($class !== static::class && is_a($class, static::class, true)) {
+            $model = (new $class)->newInstance([], true);
+            $model->setRawAttributes($attributes, true);
+            $model->setConnection($connection ?: $this->getConnectionName());
+            $model->fireModelEvent('retrieved', false);
+
+            return $model;
+        }
+
+        return parent::newFromBuilder($attributes, $connection);
     }
 
     public function setUpRichContent(): void

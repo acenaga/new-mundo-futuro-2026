@@ -124,7 +124,7 @@
          CONTENIDO
     ═══════════════════════════════════════════════════════════════════ --}}
     <div class="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
-        <div class="font-body prose-lg max-w-none leading-relaxed text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84] dark:text-[#c8c8e0] [&_h2]:text-[#e2e2f0] [&_h3]:text-[#e2e2f0] [&_strong]:text-[#e2e2f0] [&_a]:text-[#c1c1ff]">
+        <div class="font-body prose-lg max-w-none leading-relaxed text-[#2a2a3a] [&_h2]:text-[#12121d] [&_h3]:text-[#12121d] [&_strong]:text-[#12121d] [&_a]:text-[#4c2e84] dark:text-[#c8c8e0] dark:[&_h2]:text-[#e2e2f0] dark:[&_h3]:text-[#e2e2f0] dark:[&_strong]:text-[#e2e2f0] dark:[&_a]:text-[#c1c1ff]">
             {!! \App\Support\RichContent\RichContentOutput::render($tutorial->renderRichContent('body')) !!}
         </div>
     </div>

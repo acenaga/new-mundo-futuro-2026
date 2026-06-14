@@ -45,10 +45,9 @@ class CleanupOrphanedMediaCommand extends Command
             $content = (string) ($model->$field ?? '');
 
             $hasUuid = str_contains($content, $item->uuid);
-            $hasFileName = str_contains($content, $item->file_name);
             $hasStoragePath = str_contains($content, "/storage/{$item->id}/");
 
-            if ($hasUuid || $hasFileName || $hasStoragePath) {
+            if ($hasUuid || $hasStoragePath) {
                 continue;
             }
 

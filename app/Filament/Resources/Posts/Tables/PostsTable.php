@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Posts\Tables;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -28,6 +29,10 @@ class PostsTable
                 TextColumn::make('title')
                     ->label('Título')
                     ->searchable()
+                    ->sortable(),
+                TextColumn::make('type')
+                    ->label('Tipo')
+                    ->badge()
                     ->sortable(),
                 TextColumn::make('author.name')
                     ->label('Autor')
@@ -57,6 +62,9 @@ class PostsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('type')
+                    ->label('Tipo')
+                    ->options(PostType::class),
                 SelectFilter::make('status')
                     ->label('Estado')
                     ->options(PostStatus::class),

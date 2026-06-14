@@ -18,7 +18,7 @@ it('serves core public routes', function () {
         'category_id' => $newsCategory->id,
     ]);
 
-    $tutorial = Post::factory()->published()->create([
+    $tutorial = Post::factory()->tutorial()->published()->create([
         'category_id' => $tutorialsCategory->id,
     ]);
 

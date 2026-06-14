@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\DateTimePicker;
@@ -34,6 +35,11 @@ class PostForm
                             ->preload()
                             ->default(fn () => auth()->id())
                             ->visible(fn () => auth()->user()?->hasRole('admin'))
+                            ->required(),
+                        Select::make('type')
+                            ->label('Tipo')
+                            ->options(PostType::class)
+                            ->default(PostType::Article)
                             ->required(),
                         Select::make('category_id')
                             ->label('Categoría')

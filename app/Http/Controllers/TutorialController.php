@@ -10,8 +10,6 @@ use Illuminate\Http\Request;
 
 class TutorialController extends Controller
 {
-    private const TUTORIAL_CATEGORY_SLUG = 'tutoriales';
-
     public function index(Request $request): View
     {
         $tagSlug = $request->query('tag');
@@ -30,7 +28,7 @@ class TutorialController extends Controller
             'posts',
             fn ($q) => $q
                 ->where('status', PostStatus::Published)
-                ->whereHas('category', fn ($q2) => $q2->where('slug', self::TUTORIAL_CATEGORY_SLUG))
+                ->where('type', 'tutorial')
         )->orderBy('name')->get();
 
         return view('tutoriales.index', compact('tutorials', 'tags', 'tagSlug'));
