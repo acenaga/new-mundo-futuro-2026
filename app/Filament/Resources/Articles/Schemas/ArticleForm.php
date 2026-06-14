@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Schemas;
+namespace App\Filament\Resources\Articles\Schemas;
 
 use App\Enums\PostStatus;
-use App\Enums\PostType;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Models\Category;
 use App\Rules\OnlyYouTubeEmbeds;
@@ -15,13 +14,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class PostForm
+class ArticleForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -39,66 +37,32 @@ class PostForm
                             ->default(fn () => auth()->id())
                             ->visible(fn () => auth()->user()?->hasRole('admin'))
                             ->required(),
-                        Select::make('type')
-                            ->label('Tipo')
-                            ->options(PostType::class)
-                            ->default(PostType::Article)
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                                $stateVal = $state instanceof PostType ? $state->value : $state;
-                                if ($stateVal === PostType::Tutorial->value) {
-                                    $tutorialCategory = Category::where('slug', 'tutoriales')->first();
-                                    if ($tutorialCategory) {
-                                        $set('category_id', $tutorialCategory->id);
-                                    }
-                                } else {
-                                    $currentCategory = Category::find($get('category_id'));
-                                    if ($currentCategory && $currentCategory->slug === 'tutoriales') {
-                                        $set('category_id', null);
-                                    }
-                                }
-                            }),
                         Select::make('category_id')
                             ->label('Categoría')
                             ->relationship(
                                 name: 'category',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: function (Builder $query, Get $get) {
-                                    $type = $get('type');
-                                    $isTutorial = ($type instanceof PostType ? $type->value : $type) === PostType::Tutorial->value;
-
-                                    return $query->when(
-                                        $isTutorial,
-                                        fn ($q) => $q->where('slug', 'tutoriales'),
-                                        fn ($q) => $q->where('slug', '!=', 'tutoriales')
-                                    );
+                                modifyQueryUsing: function (Builder $query) {
+                                    return $query->where('slug', '!=', 'tutoriales');
                                 }
                             )
                             ->searchable()
                             ->preload()
                             ->nullable()
                             ->rules([
-                                function (Get $get) {
-                                    return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                function () {
+                                    return function (string $attribute, $value, \Closure $fail) {
                                         if (! $value) {
                                             return;
                                         }
-
-                                        $type = $get('type');
-                                        $isTutorial = ($type instanceof PostType ? $type->value : $type) === PostType::Tutorial->value;
 
                                         $category = Category::find($value);
                                         if (! $category) {
                                             return;
                                         }
 
-                                        if ($isTutorial && $category->slug !== 'tutoriales') {
-                                            $fail('Un tutorial solo puede tener la categoría "Tutoriales".');
-                                        }
-
-                                        if (! $isTutorial && $category->slug === 'tutoriales') {
-                                            $fail('Una publicación no puede tener la categoría "Tutoriales".');
+                                        if ($category->slug === 'tutoriales') {
+                                            $fail('Un artículo no puede tener la categoría "Tutoriales".');
                                         }
                                     };
                                 },

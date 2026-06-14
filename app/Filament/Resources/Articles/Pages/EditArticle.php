@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Pages;
+namespace App\Filament\Resources\Articles\Pages;
 
-use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Resources\Articles\ArticleResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditPost extends EditRecord
+class EditArticle extends EditRecord
 {
-    protected static string $resource = PostResource::class;
+    protected static string $resource = ArticleResource::class;
 
     protected function getHeaderActions(): array
     {

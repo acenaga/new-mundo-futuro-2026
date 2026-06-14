@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Tables;
+namespace App\Filament\Resources\Articles\Tables;
 
 use App\Enums\PostStatus;
-use App\Enums\PostType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -14,7 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class PostsTable
+class ArticlesTable
 {
     public static function configure(Table $table): Table
     {
@@ -29,10 +28,6 @@ class PostsTable
                 TextColumn::make('title')
                     ->label('Título')
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('type')
-                    ->label('Tipo')
-                    ->badge()
                     ->sortable(),
                 TextColumn::make('author.name')
                     ->label('Autor')
@@ -62,15 +57,12 @@ class PostsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('type')
-                    ->label('Tipo')
-                    ->options(PostType::class),
                 SelectFilter::make('status')
                     ->label('Estado')
                     ->options(PostStatus::class),
                 SelectFilter::make('category')
                     ->label('Categoría')
-                    ->relationship('category', 'name'),
+                    ->relationship('category', 'name', fn ($query) => $query->where('slug', '!=', 'tutoriales')),
             ])
             ->recordActions([
                 ViewAction::make(),

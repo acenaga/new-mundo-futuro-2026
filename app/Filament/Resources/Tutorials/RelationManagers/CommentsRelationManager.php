@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Posts\RelationManagers;
+namespace App\Filament\Resources\Tutorials\RelationManagers;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
