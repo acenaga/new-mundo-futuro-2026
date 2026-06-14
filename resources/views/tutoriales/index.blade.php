@@ -36,7 +36,7 @@
                 @if ($tags->isNotEmpty())
                     <div class="flex flex-col gap-3 border-t pt-6 border-gray-200/60 dark:border-[#3a3a55]/30">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="font-display mr-1 text-xs font-semibold uppercase tracking-widest text-[#c8c8e0] dark:text-[#3a3a55]">
+                            <span class="font-display mr-1 text-xs font-semibold uppercase tracking-widest text-[#4a4a6a] dark:text-[#9999b3]">
                                 Etiqueta
                             </span>
                             <a href="{{ route('tutoriales') }}"
@@ -238,7 +238,7 @@
                         </a>
                     @endif
 
-                    <span class="font-display text-xs tabular-nums text-[#c8c8e0] dark:text-[#3a3a55]">
+                    <span class="font-display text-xs tabular-nums text-[#4a4a6a] dark:text-[#9999b3]">
                         {{ $tutorials->currentPage() }} / {{ $tutorials->lastPage() }}
                     </span>
 
