@@ -42,7 +42,7 @@ class Post extends Model implements HasMedia, HasRichContent
                 $post->type = PostType::Tutorial;
 
                 $tutorialCategory = Category::where('slug', 'tutoriales')->first()
-                    ?? Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+                    ?? Category::create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
 
                 if ($post->category_id !== null && (int) $post->category_id !== (int) $tutorialCategory->id) {
                     throw new \InvalidArgumentException('Un tutorial solo puede tener la categoría "Tutoriales".');
