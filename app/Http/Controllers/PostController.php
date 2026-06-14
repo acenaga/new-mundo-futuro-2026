@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Tag;
@@ -30,7 +31,7 @@ class PostController extends Controller
 
         $posts = $query->paginate(10)->withQueryString();
 
-        $categories = Category::whereHas('posts', fn ($q) => $q->where('type', 'article'))
+        $categories = Category::whereHas('posts', fn ($q) => $q->where('type', PostType::Article))
             ->orderBy('name')
             ->get();
 
@@ -38,7 +39,7 @@ class PostController extends Controller
             'posts',
             fn ($q) => $q
                 ->where('status', PostStatus::Published)
-                ->where('type', 'article')
+                ->where('type', PostType::Article)
         )->orderBy('name')->get();
 
         return view('publicaciones.index', compact('posts', 'categories', 'categorySlug', 'tags', 'tagSlug'));

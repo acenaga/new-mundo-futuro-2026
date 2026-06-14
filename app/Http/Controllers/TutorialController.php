@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Models\Tag;
 use App\Models\Tutorial;
 use Illuminate\Contracts\View\View;
@@ -28,7 +29,7 @@ class TutorialController extends Controller
             'posts',
             fn ($q) => $q
                 ->where('status', PostStatus::Published)
-                ->where('type', 'tutorial')
+                ->where('type', PostType::Tutorial)
         )->orderBy('name')->get();
 
         return view('tutoriales.index', compact('tutorials', 'tags', 'tagSlug'));
