@@ -10,14 +10,25 @@ class TutorialFactory extends PostFactory
 {
     protected $model = Tutorial::class;
 
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Tutorial $tutorial) {
+            $category = Category::where('slug', 'tutoriales')->first()
+                ?? Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
+
+            $tutorial->category()->associate($category);
+            $tutorial->saveQuietly();
+        });
+    }
+
     public function definition(): array
     {
-        $category = Category::where('slug', 'tutoriales')->first()
-            ?? Category::factory()->create(['slug' => 'tutoriales', 'name' => 'Tutoriales']);
-
         return array_merge(parent::definition(), [
             'type' => PostType::Tutorial,
-            'category_id' => $category->id,
+            'category_id' => null,
         ]);
     }
 }
