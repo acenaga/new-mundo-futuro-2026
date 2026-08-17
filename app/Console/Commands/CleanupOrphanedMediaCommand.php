@@ -31,13 +31,23 @@ class CleanupOrphanedMediaCommand extends Command
             $model = $item->model;
 
             if (! $model) {
+                $this->line("Huérfano (Modelo no existe): [{$item->model_type}#{$item->model_id}] {$item->file_name} ({$item->uuid})");
+                $count++;
+
+                if (! $dryRun) {
+                    $item->delete();
+                }
+
                 continue;
             }
 
             $field = self::COLLECTION_FIELD_MAP[$item->collection_name];
             $content = (string) ($model->$field ?? '');
 
-            if (str_contains($content, 'id="'.$item->uuid.'"')) {
+            $hasUuid = str_contains($content, $item->uuid);
+            $hasStoragePath = str_contains($content, "/storage/{$item->id}/");
+
+            if ($hasUuid || $hasStoragePath) {
                 continue;
             }
 

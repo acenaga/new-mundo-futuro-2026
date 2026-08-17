@@ -3,22 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Models\Post;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
-    private const TUTORIAL_CATEGORY_SLUG = 'tutoriales';
-
     public function index(): Response
     {
         $posts = Post::where('status', PostStatus::Published)
-            ->with('category')
             ->latest('published_at')
-            ->get(['slug', 'published_at', 'updated_at', 'category_id']);
+            ->get(['id', 'slug', 'type', 'published_at', 'updated_at']);
 
-        $tutorials = $posts->filter(fn($p) => $p->category?->slug === self::TUTORIAL_CATEGORY_SLUG);
-        $publicaciones = $posts->filter(fn($p) => $p->category?->slug !== self::TUTORIAL_CATEGORY_SLUG);
+        $tutorials = $posts->filter(fn (Post $p): bool => $p->type === PostType::Tutorial);
+        $publicaciones = $posts->filter(fn (Post $p): bool => $p->type === PostType::Article);
 
         return response()
             ->view('sitemap', compact('tutorials', 'publicaciones'))

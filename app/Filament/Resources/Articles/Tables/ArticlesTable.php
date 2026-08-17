@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Tables;
+namespace App\Filament\Resources\Articles\Tables;
 
 use App\Enums\PostStatus;
 use Filament\Actions\BulkActionGroup;
@@ -13,7 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class PostsTable
+class ArticlesTable
 {
     public static function configure(Table $table): Table
     {
@@ -62,7 +62,7 @@ class PostsTable
                     ->options(PostStatus::class),
                 SelectFilter::make('category')
                     ->label('Categoría')
-                    ->relationship('category', 'name'),
+                    ->relationship('category', 'name', fn ($query) => $query->where('slug', '!=', 'tutoriales')),
             ])
             ->recordActions([
                 ViewAction::make(),

@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -77,7 +78,7 @@ class User extends Authenticatable implements FilamentUser
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn($word) => Str::substr($word, 0, 1))
+            ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 
@@ -93,7 +94,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     // Relación: Un usuario (estudiante) completa muchas lecciones
-    public function completedLessons()
+    public function completedLessons(): BelongsToMany
     {
         return $this->belongsToMany(Lesson::class, 'lesson_user')
             ->withPivot('completed_at')
@@ -101,7 +102,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     // Relación: Gamificación - Medallas ganadas
-    public function achievements()
+    public function achievements(): BelongsToMany
     {
         return $this->belongsToMany(Achievement::class, 'achievement_user')
             ->withPivot('awarded_at');

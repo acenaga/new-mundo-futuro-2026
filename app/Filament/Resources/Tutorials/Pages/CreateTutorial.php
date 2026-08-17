@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Pages;
+namespace App\Filament\Resources\Tutorials\Pages;
 
-use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Resources\Tutorials\TutorialResource;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreatePost extends CreateRecord
+class CreateTutorial extends CreateRecord
 {
-    protected static string $resource = PostResource::class;
+    protected static string $resource = TutorialResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

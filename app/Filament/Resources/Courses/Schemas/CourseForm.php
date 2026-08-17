@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Courses\Schemas;
 
+use App\Enums\CourseStatus;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\FileUpload;
@@ -9,6 +10,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -24,7 +26,7 @@ class CourseForm
                 TextInput::make('title')
                     ->required()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, Set $set) {
                         $set('slug', Str::slug($state));
                     })
                     ->maxLength(255),
@@ -49,9 +51,10 @@ class CourseForm
                 FileUpload::make('image_path')
                     ->imageEditor()
                     ->image(),
-                TextInput::make('status')
-                    ->required()
-                    ->default('draft'),
+                Select::make('status')
+                    ->options(CourseStatus::class)
+                    ->default(CourseStatus::Draft)
+                    ->required(),
                 Toggle::make('is_premium')
                     ->required(),
             ]);

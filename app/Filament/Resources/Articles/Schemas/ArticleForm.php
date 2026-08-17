@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Posts\Schemas;
+namespace App\Filament\Resources\Articles\Schemas;
 
 use App\Enums\PostStatus;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Models\Category;
 use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -13,10 +14,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class PostForm
+class ArticleForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -31,15 +34,39 @@ class PostForm
                             ->relationship('author', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(fn() => auth()->id())
-                            ->visible(fn() => auth()->user()?->hasRole('admin'))
+                            ->default(fn () => auth()->id())
+                            ->visible(fn () => auth()->user()?->hasRole('admin'))
                             ->required(),
                         Select::make('category_id')
                             ->label('Categoría')
-                            ->relationship('category', 'name')
+                            ->relationship(
+                                name: 'category',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: function (Builder $query) {
+                                    return $query->where('slug', '!=', 'tutoriales');
+                                }
+                            )
                             ->searchable()
                             ->preload()
-                            ->nullable(),
+                            ->nullable()
+                            ->rules([
+                                function () {
+                                    return function (string $attribute, $value, \Closure $fail) {
+                                        if (! $value) {
+                                            return;
+                                        }
+
+                                        $category = Category::find($value);
+                                        if (! $category) {
+                                            return;
+                                        }
+
+                                        if ($category->slug === 'tutoriales') {
+                                            $fail('Un artículo no puede tener la categoría "Tutoriales".');
+                                        }
+                                    };
+                                },
+                            ]),
                         Select::make('status')
                             ->label('Estado')
                             ->options(PostStatus::class)
@@ -79,7 +106,7 @@ class PostForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn($state, callable $set) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn ($state, Set $set) => $set('slug', Str::slug($state))),
                         TextInput::make('slug')
                             ->required()
                             ->disabled()
