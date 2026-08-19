@@ -2,6 +2,8 @@
 
 namespace App\Support\RichContent;
 
+use Illuminate\Support\Str;
+
 class RichContentOutput
 {
     public static function render(string $html): string
@@ -24,7 +26,9 @@ class RichContentOutput
             $withParagraphTokens,
         );
 
-        return is_string($withInlineTokens) ? $withInlineTokens : $withParagraphTokens;
+        $renderedHtml = is_string($withInlineTokens) ? $withInlineTokens : $withParagraphTokens;
+
+        return self::normalizePublicStorageUrls($renderedHtml);
     }
 
     private static function stripEditorPreviewBlocks(string $html): string
@@ -39,38 +43,29 @@ class RichContentOutput
             $cleaned = $html;
         }
 
-        $cleaned = preg_replace(
-            '/<figure[^>]*>.*?<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>.*?(?:<figcaption[^>]*>.*?solo editor.*?<\/figcaption>)?.*?<\/figure>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            $cleaned = $html;
-        }
-
-        $cleaned = preg_replace(
-            '/<p>\s*<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>\s*<\/p>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            return $html;
-        }
-
-        $cleaned = preg_replace(
-            '/<img[^>]*src=["\']https?:\/\/img\.youtube\.com\/vi\/[a-zA-Z0-9_-]{11}\/hqdefault\.jpg[^"\']*["\'][^>]*>/si',
-            '',
-            $cleaned,
-        );
-
-        if (! is_string($cleaned)) {
-            return $html;
-        }
-
-        $cleaned = str_replace('Vista previa del video (solo editor)', '', $cleaned);
-
         return $cleaned;
+    }
+
+    private static function normalizePublicStorageUrls(string $html): string
+    {
+        if (! app()->bound('request')) {
+            return $html;
+        }
+
+        $rootUrl = rtrim(url('/'), '/');
+
+        return preg_replace_callback(
+            '/https?:\/\/[^"\']+\/storage\/[^"\']+/i',
+            function (array $matches) use ($rootUrl): string {
+                $path = parse_url($matches[0], PHP_URL_PATH);
+
+                if (! is_string($path) || ! Str::startsWith($path, '/storage/')) {
+                    return $matches[0];
+                }
+
+                return $rootUrl.$path;
+            },
+            $html,
+        ) ?? $html;
     }
 }

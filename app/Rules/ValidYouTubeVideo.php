@@ -11,7 +11,7 @@ class ValidYouTubeVideo implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (YouTubeEmbed::extractVideoId(is_string($value) ? $value : null) === null) {
-            $fail('Ingresa una URL valida de YouTube.');
+            $fail(__('validation.valid_youtube_video'));
         }
     }
 }

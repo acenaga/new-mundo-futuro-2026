@@ -18,7 +18,7 @@ class OnlyYouTubeEmbeds implements ValidationRule
 
         foreach ($iframeMatches[1] ?? [] as $src) {
             if (! YouTubeEmbed::isAllowedEmbedUrl($src)) {
-                $fail('Solo se permiten iframes de YouTube en el contenido.');
+                $fail(__('validation.only_youtube_embeds'));
 
                 return;
             }
@@ -28,7 +28,7 @@ class OnlyYouTubeEmbeds implements ValidationRule
 
         foreach ($tokenMatches[1] ?? [] as $tokenValue) {
             if (YouTubeEmbed::extractVideoId($tokenValue) === null) {
-                $fail('El identificador de video de YouTube no es valido.');
+                $fail(__('validation.youtube_embed_invalid'));
 
                 return;
             }

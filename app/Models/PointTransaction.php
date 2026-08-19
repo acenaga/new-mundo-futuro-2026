@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class PointTransaction extends Model
 {
@@ -11,17 +13,17 @@ class PointTransaction extends Model
         'amount',
         'description',
         'reference_type', // Polimórfico
-        'reference_id'    // Polimórfico
+        'reference_id',    // Polimórfico
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     // Relación Polimórfica: ¿Qué generó estos puntos?
     // Puede ser el completion de una Lesson, un Comment aprobado, etc.
-    public function reference()
+    public function reference(): MorphTo
     {
         return $this->morphTo();
     }

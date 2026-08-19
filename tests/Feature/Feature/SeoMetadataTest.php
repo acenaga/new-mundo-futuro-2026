@@ -2,6 +2,7 @@
 
 use App\Models\Category;
 use App\Models\Post;
+use Illuminate\Support\Facades\URL;
 
 it('renders valid json-ld and absolute og image in publicaciones show', function () {
     $category = Category::factory()->create([
@@ -35,12 +36,12 @@ it('renders valid json-ld and absolute og image in publicaciones show', function
 });
 
 it('renders valid json-ld and absolute og image in tutoriales show', function () {
-    $category = Category::factory()->create([
-        'name' => 'Tutoriales',
-        'slug' => 'tutoriales',
-    ]);
+    $category = Category::firstOrCreate(
+        ['slug' => 'tutoriales'],
+        ['name' => 'Tutoriales']
+    );
 
-    $post = Post::factory()->published()->create([
+    $post = Post::factory()->tutorial()->published()->create([
         'category_id' => $category->id,
         'title' => 'Guia "Tech" paso a paso',
         'excerpt' => 'Descripcion con "escape" seguro',
@@ -120,6 +121,30 @@ it('renders youtube token as embedded iframe in publicaciones show', function ()
     $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
 });
 
+it('renders post images using the current request host even if app url is localhost', function () {
+    config()->set('app.url', 'http://localhost');
+    URL::forceRootUrl('https://new-mundo-futuro-2026.test');
+    URL::forceScheme('https');
+
+    $category = Category::factory()->create([
+        'name' => 'Noticias',
+        'slug' => 'noticias',
+    ]);
+
+    $post = Post::factory()->published()->create([
+        'category_id' => $category->id,
+        'cover_image_path' => 'covers/host-aware-cover.jpg',
+        'body' => '<p><img src="http://localhost/storage/body/host-aware-inline.jpg" alt="inline"></p>',
+    ]);
+
+    $response = $this->get(route('publicaciones.show', $post, false));
+
+    $response->assertSuccessful();
+    $response->assertSee('src="https://new-mundo-futuro-2026.test/storage/covers/host-aware-cover.jpg"', false);
+    $response->assertSee('src="https://new-mundo-futuro-2026.test/storage/body/host-aware-inline.jpg"', false);
+    $response->assertDontSee('src="http://localhost/storage/body/host-aware-inline.jpg"', false);
+});
+
 it('does not render youtube editor preview block in publicaciones show', function () {
     $category = Category::factory()->create([
         'name' => 'Noticias',
@@ -135,25 +160,6 @@ it('does not render youtube editor preview block in publicaciones show', functio
 
     $response->assertSuccessful();
     $response->assertDontSee('nmf-youtube-preview', false);
-    $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
-});
-
-it('does not render youtube editor preview block when class is stripped', function () {
-    $category = Category::factory()->create([
-        'name' => 'Noticias',
-        'slug' => 'noticias',
-    ]);
-
-    $post = Post::factory()->published()->create([
-        'category_id' => $category->id,
-        'body' => '<p>Intro</p><figure><img src="https://img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg" alt="Vista previa de YouTube"><figcaption>Vista previa del video (solo editor)</figcaption></figure><p>[[youtube:Cn8HBj8QAbk]]</p>',
-    ]);
-
-    $response = $this->get(route('publicaciones.show', $post));
-
-    $response->assertSuccessful();
-    $response->assertDontSee('img.youtube.com/vi/Cn8HBj8QAbk/hqdefault.jpg', false);
-    $response->assertDontSee('Vista previa del video (solo editor)', false);
     $response->assertSee('https://www.youtube.com/embed/Cn8HBj8QAbk', false);
 });
 

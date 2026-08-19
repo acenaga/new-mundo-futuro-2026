@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CourseStatus;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -69,7 +70,7 @@ class CourseSeeder extends Seeder
                     'slug' => $slug,
                     'description' => $data['description'],
                     'image_path' => null,
-                    'status' => 'published',
+                    'status' => CourseStatus::Published,
                     'is_premium' => false,
                 ]
             );
