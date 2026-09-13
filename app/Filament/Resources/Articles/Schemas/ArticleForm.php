@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Articles\Schemas;
 
 use App\Enums\PostStatus;
+use App\Filament\Forms\Components\CoverImageUpload;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Models\Category;
 use App\Rules\OnlyYouTubeEmbeds;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -24,10 +24,42 @@ class ArticleForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(['default' => 1, 'lg' => 3])
             ->components([
+                Section::make('Contenido')
+                    ->columnSpan(['default' => 1, 'lg' => 2])
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Título')
+                            ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn ($state, Set $set) => $set('slug', Str::slug($state))),
+                        TextInput::make('slug')
+                            ->required()
+                            ->disabled()
+                            ->dehydrated()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255),
+                        Textarea::make('excerpt')
+                            ->label('Extracto')
+                            ->rows(3)
+                            ->maxLength(500),
+                        RichEditor::make('body')
+                            ->label('Contenido')
+                            ->required()
+                            ->plugins([
+                                YouTubeEmbedRichContentPlugin::make(),
+                            ])
+                            ->enableToolbarButtons([
+                                ['youtubeEmbed', 'youtubeReplace', 'youtubeRemove'],
+                            ])
+                            ->preventFileAttachmentPathTampering()
+                            ->rule(new OnlyYouTubeEmbeds),
+                    ]),
                 Section::make('Configuración')
-                    ->columns(2)
-                    ->columnSpanFull()
+                    ->columns(1)
+                    ->columnSpan(['default' => 1, 'lg' => 1])
                     ->schema([
                         Select::make('user_id')
                             ->label('Autor')
@@ -80,54 +112,16 @@ class ArticleForm
                             ->relationship('tags', 'name')
                             ->multiple()
                             ->searchable()
-                            ->preload()
-                            ->columnSpanFull(),
-                        FileUpload::make('cover_image_path')
-                            ->label('Imagen de portada')
-                            ->disk('public')
-                            ->image()
-                            ->imageEditor()
-                            ->visibility('public')
-                            ->columnSpanFull(),
+                            ->preload(),
+                        CoverImageUpload::make('cover_image_path')
+                            ->label('Imagen de portada'),
                         TextInput::make('video_url')
                             ->label('URL del video (YouTube)')
                             ->url()
-                            ->placeholder('https://www.youtube.com/watch?v=...')
-                            ->columnSpanFull(),
+                            ->placeholder('https://www.youtube.com/watch?v=...'),
                         Toggle::make('allow_comments')
                             ->label('Permitir comentarios')
                             ->default(true),
-                    ]),
-                Section::make('Contenido')
-                    ->columnSpanFull()
-                    ->schema([
-                        TextInput::make('title')
-                            ->label('Título')
-                            ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Set $set) => $set('slug', Str::slug($state))),
-                        TextInput::make('slug')
-                            ->required()
-                            ->disabled()
-                            ->dehydrated()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        Textarea::make('excerpt')
-                            ->label('Extracto')
-                            ->rows(3)
-                            ->maxLength(500),
-                        RichEditor::make('body')
-                            ->label('Contenido')
-                            ->required()
-                            ->plugins([
-                                YouTubeEmbedRichContentPlugin::make(),
-                            ])
-                            ->enableToolbarButtons([
-                                ['youtubeEmbed', 'youtubeReplace', 'youtubeRemove'],
-                            ])
-                            ->preventFileAttachmentPathTampering()
-                            ->rule(new OnlyYouTubeEmbeds),
                     ]),
             ]);
     }

@@ -11,6 +11,9 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tutorial;
 use App\Models\User;
+use App\Support\Images\CoverImageOptimizer;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -249,4 +252,34 @@ test('body strips non-youtube iframe embeds before persisting in article', funct
 
     expect($post->body)->not->toContain('<iframe');
     expect($post->body)->not->toContain('example.com');
+});
+
+test('cover image is optimised and stored as webp when creating an article', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $category = Category::factory()->create(['slug' => 'noticias']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateArticle::class)
+        ->fillForm([
+            'title' => 'Artículo con portada',
+            'excerpt' => 'Extracto',
+            'body' => '<p>Contenido</p>',
+            'category_id' => $category->id,
+            'status' => PostStatus::Draft,
+            'cover_image_path' => UploadedFile::fake()->image('portada.png', 2400, 1350),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $article = Article::query()->where('title', 'Artículo con portada')->firstOrFail();
+
+    expect($article->cover_image_path)->toEndWith('.webp');
+    Storage::disk('public')->assertExists($article->cover_image_path);
+
+    [$width] = getimagesize(Storage::disk('public')->path($article->cover_image_path));
+    expect($width)->toBe(CoverImageOptimizer::MAX_WIDTH);
 });
