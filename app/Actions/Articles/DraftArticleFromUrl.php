@@ -29,10 +29,20 @@ class DraftArticleFromUrl
     ) {}
 
     /**
+     * Seconds allowed for the whole pipeline (download, text generation, images and cover).
+     */
+    public const int TIME_LIMIT = 300;
+
+    /**
      * Build a Spanish article draft from an external URL.
+     *
+     * The pipeline performs several slow network calls, so the PHP execution time limit
+     * is raised for this request; the web server timeout may still need to allow it.
      */
     public function __invoke(string $url, bool $importImages = true, bool $generateCover = true): ArticleDraft
     {
+        @set_time_limit(self::TIME_LIMIT);
+
         $source = $this->extractor->extract($url);
         $warnings = [];
 
