@@ -80,6 +80,11 @@ class Post extends Model implements HasMedia, HasRichContent
         'body',
         'cover_image_path',
         'video_url',
+        'source_url',
+        'source_title',
+        'source_author',
+        'source_site',
+        'source_published_at',
         'status',
         'published_at',
         'allow_comments',
@@ -91,6 +96,7 @@ class Post extends Model implements HasMedia, HasRichContent
             'type' => PostType::class,
             'status' => PostStatus::class,
             'published_at' => 'datetime',
+            'source_published_at' => 'datetime',
             'allow_comments' => 'boolean',
         ];
     }
@@ -122,6 +128,14 @@ class Post extends Model implements HasMedia, HasRichContent
         }
 
         return parent::newFromBuilder($attributes, $connection);
+    }
+
+    /**
+     * Determine whether the post is based on an external source.
+     */
+    public function hasSource(): bool
+    {
+        return filled($this->source_url);
     }
 
     public function setUpRichContent(): void

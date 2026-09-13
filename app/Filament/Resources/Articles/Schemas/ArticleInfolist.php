@@ -36,6 +36,24 @@ class ArticleInfolist
                     ->label('Contenido')
                     ->html()
                     ->columnSpanFull(),
+                TextEntry::make('source_url')
+                    ->label('Fuente (URL)')
+                    ->url(fn (?string $state) => $state, shouldOpenInNewTab: true)
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('source_title')
+                    ->label('Título original')
+                    ->placeholder('-'),
+                TextEntry::make('source_author')
+                    ->label('Autor original')
+                    ->placeholder('-'),
+                TextEntry::make('source_site')
+                    ->label('Sitio de origen')
+                    ->placeholder('-'),
+                TextEntry::make('source_published_at')
+                    ->label('Publicación original')
+                    ->dateTime()
+                    ->placeholder('-'),
                 ImageEntry::make('cover_image_path')
                     ->label('Portada')
                     ->disk('public')

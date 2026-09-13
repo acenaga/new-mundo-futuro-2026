@@ -49,6 +49,17 @@ class PostFactory extends Factory
         ]);
     }
 
+    public function fromSource(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'source_url' => 'https://laravel-news.com/laravel-starter-kits-vite-plus',
+            'source_title' => 'Laravel Starter Kits Now Ship with Vite+',
+            'source_author' => 'Paul Redmond',
+            'source_site' => 'Laravel News',
+            'source_published_at' => now()->subDay(),
+        ]);
+    }
+
     public function tutorial(): static
     {
         return $this->state(fn (array $attributes) => [
