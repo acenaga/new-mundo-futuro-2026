@@ -92,6 +92,23 @@
     @endif
 
     {{-- ═══════════════════════════════════════════════════════════════════
+         VIDEO
+    ═══════════════════════════════════════════════════════════════════ --}}
+    @if ($post->youtube_embed_url)
+        <div class="mx-auto max-w-4xl px-6 pt-14 lg:px-8 lg:pt-20">
+            <div class="shadow-ambient overflow-hidden rounded-2xl bg-[#e8e8ff] dark:bg-[#1b1b25]">
+                <div class="relative aspect-video w-full">
+                    <iframe src="{{ $post->youtube_embed_url }}" title="{{ $post->title }}"
+                        class="absolute inset-0 h-full w-full" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ═══════════════════════════════════════════════════════════════════
          BODY
     ═══════════════════════════════════════════════════════════════════ --}}
     <div class="mx-auto max-w-4xl px-6 py-14 lg:px-8 lg:py-20">
