@@ -338,9 +338,7 @@ $this->middleware([
 Monitor agent execution:
 
 ```bash
-
 # Set environment variable
-
 INSPECTOR_INGESTION_KEY=your_key_here
 ```
 

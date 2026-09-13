@@ -666,21 +666,16 @@ foreach ($middleware->getRecorded() as $record) {
 ## Running Tests
 
 ```bash
-
 # Run all tests
-
 composer test
 
 # Run specific test file
-
 vendor/bin/phpunit tests/Agent/AgentTest.php
 
 # Run specific test method
-
 vendor/bin/phpunit --filter test_chat_with_tools
 
 # Run with verbose output
-
 vendor/bin/phpunit --colors=always -v
 ```
 

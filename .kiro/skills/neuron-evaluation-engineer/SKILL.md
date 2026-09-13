@@ -321,21 +321,16 @@ $this->assert(new GreaterThanAssertion(0.8), $score);
 ### CLI Command
 
 ```bash
-
 # Run all evaluators in a directory
-
 vendor/bin/neuron evaluation /path/to/evaluators
 
 # Verbose output (shows evaluator names)
-
 vendor/bin/neuron evaluation --verbose /path/to/evaluators
 
 # Using --path flag
-
 vendor/bin/neuron evaluation --path=/path/to/evaluators
 
 # Help
-
 vendor/bin/neuron evaluation --help
 ```
 
@@ -660,11 +655,8 @@ public function evaluate(mixed $output, array $datasetItem): void
 ## CLI Generation
 
 ```bash
-
 # (Note: Neuron CLI doesn't have make:evaluator yet)
-
 # Create evaluator manually in evaluators directory
-
 ```
 
 ## Testing Evaluators
@@ -724,9 +716,7 @@ jobs:
 ### Failing on Thresholds
 
 ```bash
-
 # Run and exit with 1 if any failures
-
 vendor/bin/neuron evaluation evaluators || exit 1
 ```
 

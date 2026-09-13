@@ -22,9 +22,7 @@ Inspector provides deep insights into agent execution, helping you understand:
 2. **Set the ingestion key** in your environment:
 
 ```bash
-
 # .env file
-
 INSPECTOR_INGESTION_KEY=your_ingestion_key_here
 ```
 
