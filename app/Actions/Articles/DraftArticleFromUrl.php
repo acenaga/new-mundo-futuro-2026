@@ -174,6 +174,7 @@ class DraftArticleFromUrl
     private function sanitizeHtml(string $html): string
     {
         $html = preg_replace('/<(script|style|iframe|object|embed)\b[^>]*>.*?<\/\1>/is', '', $html) ?? $html;
+        $html = preg_replace('/<(\/?)h1\b[^>]*>/i', '<$1h2>', $html) ?? $html;
         $html = strip_tags($html, self::ALLOWED_TAGS);
 
         // Keep only the href attribute on anchors and drop every attribute elsewhere.

@@ -2,14 +2,16 @@
 
 namespace App\Filament\Resources\Articles\Actions;
 
-use App\Actions\Articles\DraftArticleFromUrl;
+use App\Filament\Resources\Articles\Pages\CreateArticle;
+use App\Filament\Resources\Articles\Pages\EditArticle;
+use App\Jobs\DraftArticleFromUrlJob;
+use App\Support\Sources\ArticleDraftStore;
 use App\Support\Sources\SourceUnavailableException;
+use App\Support\Sources\UrlSafety;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\ValidationException;
@@ -22,8 +24,9 @@ class ImportFromUrlAction
             ->label('Importar desde URL')
             ->icon(Heroicon::OutlinedLink)
             ->color('gray')
+            ->disabled(fn (CreateArticle|EditArticle $livewire): bool => $livewire->pendingDraftKey !== null)
             ->modalHeading('Importar artículo desde una URL')
-            ->modalDescription('Se descargará el artículo, se redactará una versión en español citando la fuente y se rellenarán el título, el extracto, el contenido y los datos de la fuente. Los valores actuales de esos campos se sobrescribirán. Revisa el resultado antes de publicar.')
+            ->modalDescription('Se descargará el artículo, se redactará una versión en español citando la fuente y se rellenarán el título, el extracto, el contenido y los datos de la fuente. La generación se hace en segundo plano y los valores actuales de esos campos se sobrescribirán al terminar. Revisa el resultado antes de publicar.')
             ->modalSubmitActionLabel('Generar borrador')
             ->schema([
                 TextInput::make('url')
@@ -41,37 +44,31 @@ class ImportFromUrlAction
                     ->helperText('Crea una ilustración a partir del título y el extracto. Puedes reemplazarla después.')
                     ->default(true),
             ])
-            ->action(function (array $data, Schema $schema, CreateRecord|EditRecord $livewire, DraftArticleFromUrl $draftArticle): void {
+            ->action(function (array $data, Schema $schema, CreateArticle|EditArticle $livewire, ArticleDraftStore $store): void {
                 try {
-                    $draft = $draftArticle(
-                        $data['url'],
-                        importImages: (bool) ($data['import_images'] ?? true),
-                        generateCover: (bool) ($data['generate_cover'] ?? true),
-                    );
+                    UrlSafety::assertAllowed($data['url']);
                 } catch (SourceUnavailableException $exception) {
                     throw ValidationException::withMessages([
                         $schema->getStatePath().'.url' => $exception->getMessage(),
                     ]);
                 }
 
-                $livewire->form->fill([
-                    ...$livewire->form->getRawState(),
-                    ...$draft->fields,
-                ]);
+                $key = $store->start($data['url'], (int) auth()->id());
+
+                DraftArticleFromUrlJob::dispatch(
+                    $key,
+                    $data['url'],
+                    importImages: (bool) ($data['import_images'] ?? true),
+                    generateCover: (bool) ($data['generate_cover'] ?? true),
+                );
+
+                $livewire->pendingDraftKey = $key;
 
                 Notification::make()
-                    ->title('Borrador generado')
-                    ->body('Revisa el contenido, las imágenes y la cita de la fuente antes de guardar.')
-                    ->success()
+                    ->title('Generando borrador')
+                    ->body('Te avisaremos aquí mismo cuando esté listo. Puedes seguir editando mientras tanto.')
+                    ->info()
                     ->send();
-
-                foreach ($draft->warnings as $warning) {
-                    Notification::make()
-                        ->title('Aviso')
-                        ->body($warning)
-                        ->warning()
-                        ->send();
-                }
             });
     }
 }

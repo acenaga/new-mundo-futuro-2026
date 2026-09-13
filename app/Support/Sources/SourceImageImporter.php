@@ -24,7 +24,7 @@ class SourceImageImporter
     public function __construct(private readonly CoverImageOptimizer $optimizer) {}
 
     /**
-     * @return string|null Public URL of the stored image, or null when it could not be imported.
+     * @return string|null Root-relative public URL of the stored image, or null when it could not be imported.
      */
     public function import(string $url): ?string
     {
@@ -74,6 +74,6 @@ class SourceImageImporter
             }
         }
 
-        return $storedPath ? url(Storage::disk(self::DISK)->url($storedPath)) : null;
+        return $storedPath ? Storage::disk(self::DISK)->url($storedPath) : null;
     }
 }

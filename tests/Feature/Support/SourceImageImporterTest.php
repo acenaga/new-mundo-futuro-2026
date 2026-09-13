@@ -28,7 +28,7 @@ it('downloads, optimises and stores an image on the public disk', function () {
 
     $url = app(SourceImageImporter::class)->import('https://cdn.example.com/photo.png');
 
-    expect($url)->toStartWith(url('/storage/post-images/'))
+    expect($url)->toStartWith('/storage/post-images/')
         ->and($url)->toEndWith('.webp');
 
     $files = Storage::disk('public')->files('post-images');
