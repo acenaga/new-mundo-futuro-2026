@@ -14,6 +14,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
@@ -122,6 +123,31 @@ class ArticleForm
                         Toggle::make('allow_comments')
                             ->label('Permitir comentarios')
                             ->default(true),
+                    ]),
+                Section::make('Fuente')
+                    ->description('Datos del artículo original en el que se basa esta publicación.')
+                    ->columns(1)
+                    ->columnSpan(['default' => 1, 'lg' => 1])
+                    ->collapsible()
+                    ->collapsed(fn (Get $get) => blank($get('source_url')))
+                    ->schema([
+                        TextInput::make('source_url')
+                            ->label('URL de la fuente')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://ejemplo.com/articulo'),
+                        TextInput::make('source_title')
+                            ->label('Título original')
+                            ->maxLength(255),
+                        TextInput::make('source_author')
+                            ->label('Autor original')
+                            ->maxLength(255),
+                        TextInput::make('source_site')
+                            ->label('Sitio de origen')
+                            ->maxLength(255),
+                        DateTimePicker::make('source_published_at')
+                            ->label('Fecha de publicación original')
+                            ->nullable(),
                     ]),
             ]);
     }

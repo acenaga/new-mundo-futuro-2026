@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Articles\Pages;
 
+use App\Filament\Resources\Articles\Actions\ImportFromUrlAction;
 use App\Filament\Resources\Articles\ArticleResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -14,6 +15,7 @@ class EditArticle extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ImportFromUrlAction::make(),
             ViewAction::make(),
             DeleteAction::make(),
         ];

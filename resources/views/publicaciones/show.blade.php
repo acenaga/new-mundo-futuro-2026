@@ -117,6 +117,8 @@
         </div>
     </div>
 
+    <x-post-source :post="$post" />
+
     {{-- ═══════════════════════════════════════════════════════════════════
          RELATED POSTS
     ═══════════════════════════════════════════════════════════════════ --}}
@@ -214,6 +216,10 @@
                     ],
                     'url' => route('publicaciones.show', $post),
                 ];
+
+                if ($post->hasSource()) {
+                    $jsonLd['isBasedOn'] = $post->source_url;
+                }
 
                 if ($post->cover_image_url) {
                     $jsonLd['image'] = $post->cover_image_url;
