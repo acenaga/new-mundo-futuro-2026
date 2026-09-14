@@ -82,7 +82,12 @@ class DraftArticleFromUrl
 
         if ($generateCover) {
             try {
-                $fields['cover_image_path'] = $this->covers->generate($fields['title'], $excerpt);
+                $fields['cover_image_path'] = $this->covers->generate(
+                    $fields['title'],
+                    $excerpt,
+                    $this->stringOrNull($draft['cover_concept'] ?? null),
+                    $this->stringOrNull($draft['cover_headline'] ?? null),
+                );
             } catch (Throwable $exception) {
                 report($exception);
 

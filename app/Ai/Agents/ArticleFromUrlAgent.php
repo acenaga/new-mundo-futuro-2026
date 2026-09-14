@@ -51,6 +51,8 @@ class ArticleFromUrlAgent implements Agent, HasStructuredOutput
         Otros campos:
         - title: título propio en español, claro y de máximo 90 caracteres. No repitas literalmente el título original.
         - excerpt: resumen de una o dos frases, máximo 300 caracteres, sin HTML.
+        - cover_headline: titular corto en español para rotular sobre la portada, de 3 a 7 palabras y máximo 45 caracteres, sin punto final, sin comillas y sin emojis. Debe resumir la idea principal y funcionar junto a la escena de cover_concept (por ejemplo: "Despliegues automáticos con Ansible").
+        - cover_concept: describe EN INGLÉS, en una o dos frases, una escena concreta para ilustrar la portada del artículo. Elige objetos físicos reconocibles y específicos del tema (por ejemplo, para un artículo sobre despliegues: una hilera de contenedores de carga alineados sobre una cinta transportadora; para uno sobre herramientas de compilación: una caja de herramientas abierta con piezas ordenadas). Evita metáforas trilladas como cohetes, bombillas, cerebros, rayos, placas de circuito, candados brillantes, hologramas o robots. No incluyas texto, logotipos ni personas identificables.
         - source_title, source_author, source_site, source_published_at: respeta los metadatos recibidos. Corrígelos solo si el texto del artículo los contradice claramente. Si un dato no existe, devuelve null. source_published_at debe ir en formato ISO 8601.
         TXT;
     }
@@ -66,6 +68,8 @@ class ArticleFromUrlAgent implements Agent, HasStructuredOutput
             'title' => $schema->string()->required(),
             'excerpt' => $schema->string()->required(),
             'body_html' => $schema->string()->required(),
+            'cover_concept' => $schema->string()->required(),
+            'cover_headline' => $schema->string()->required(),
             'source_title' => $schema->string()->nullable(),
             'source_author' => $schema->string()->nullable(),
             'source_site' => $schema->string()->nullable(),

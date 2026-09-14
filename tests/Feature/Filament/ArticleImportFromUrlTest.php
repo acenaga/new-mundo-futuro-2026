@@ -71,6 +71,8 @@ function fakeDraftResponse(array $overrides = []): array
         'title' => 'Los starter kits de Laravel ahora usan Vite+',
         'excerpt' => 'Todos los kits de inicio de Laravel se construyen ahora con Vite+.',
         'body_html' => '<h2>Qué cambia</h2><p>Según informa <a href="https://laravel-news.com/laravel-starter-kits-vite-plus">Laravel News</a>, los kits usan <code>vp</code>.</p>',
+        'cover_concept' => 'An open toolbox on a workbench with neatly arranged wrenches replaced by a single multi-tool.',
+        'cover_headline' => 'Vite+ llega a los starter kits',
         'source_title' => 'Laravel Starter Kits Now Ship with Vite+',
         'source_author' => 'Paul Redmond',
         'source_site' => 'Laravel News',
@@ -166,7 +168,8 @@ describe('draft job', function () {
         ArticleFromUrlAgent::assertPrompted(fn ($prompt) => str_contains($prompt->prompt, 'Every Laravel starter kit now builds with Vite+')
             && str_contains($prompt->prompt, 'Paul Redmond')
             && str_contains($prompt->prompt, 'https://cdn.laravel-news.com/vite-plus.png'));
-        Image::assertGenerated(fn ($prompt) => $prompt->contains('Los starter kits de Laravel ahora usan Vite+'));
+        Image::assertGenerated(fn ($prompt) => $prompt->contains('An open toolbox on a workbench')
+            && $prompt->contains('Flat vector illustration'));
     });
 
     it('skips image import and cover generation when disabled', function () {

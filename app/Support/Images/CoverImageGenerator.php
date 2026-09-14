@@ -17,14 +17,17 @@ class CoverImageGenerator
 
     public const string DIRECTORY = 'covers';
 
-    public function __construct(private readonly CoverImageOptimizer $optimizer) {}
+    public function __construct(
+        private readonly CoverImageOptimizer $optimizer,
+        private readonly CoverBranding $branding,
+    ) {}
 
     /**
      * @return string Path of the stored cover relative to the public disk root.
      */
-    public function generate(string $title, ?string $excerpt = null): string
+    public function generate(string $title, ?string $excerpt = null, ?string $concept = null, ?string $headline = null): string
     {
-        $image = Image::of($this->buildPrompt($title, $excerpt))
+        $image = Image::of($this->buildPrompt($title, $excerpt, $concept))
             ->landscape()
             ->timeout(120)
             ->generate()
@@ -36,6 +39,8 @@ class CoverImageGenerator
 
         try {
             $optimizedPath = $this->optimizer->optimize($sourcePath);
+
+            $this->branding->apply($optimizedPath, $headline ?: $title);
 
             $storedPath = Storage::disk(self::DISK)->putFileAs(
                 self::DIRECTORY,
@@ -58,15 +63,31 @@ class CoverImageGenerator
         return $storedPath;
     }
 
-    public function buildPrompt(string $title, ?string $excerpt = null): string
+    /**
+     * Compose the image prompt: a concrete scene for this article wrapped in the
+     * site's fixed editorial art direction so every cover feels like the same publication.
+     */
+    public function buildPrompt(string $title, ?string $excerpt = null, ?string $concept = null): string
     {
-        return implode(' ', array_filter([
-            'Ilustración editorial moderna y limpia para un artículo de tecnología titulado:',
-            '"'.$title.'".',
-            filled($excerpt) ? 'Resumen del artículo: '.$excerpt : null,
-            'Estilo: digital, colores vivos con predominio de azules y violetas, composición horizontal 16:9,',
-            'formas abstractas o metáforas visuales relacionadas con el tema.',
-            'Sin texto, sin letras, sin logotipos, sin marcas de agua ni personas reales.',
-        ]));
+        $subject = filled($concept)
+            ? $concept
+            : 'A single, concrete, recognisable object or small scene that represents this article: "'.$title.'".'
+                .(filled($excerpt) ? ' Context: '.$excerpt : '');
+
+        return implode("\n", [
+            'Editorial cover illustration for a Spanish-language technology magazine.',
+            '',
+            'Subject: '.$subject,
+            '',
+            'Art direction:',
+            '- Flat vector illustration with clean geometric shapes, crisp edges and subtle paper grain. Think modern editorial magazine spot illustration, not 3D render, not photo, not concept art.',
+            '- One clear focal subject placed in the right two thirds of the frame. The left third of the image must stay completely empty: flat, plain background colour with no objects, shapes or details, reserved for a headline that will be added later.',
+            '- Uncluttered composition, few elements, strong silhouette.',
+            '- Limited palette: deep indigo #110090 and violet #4c2e84 as dominant tones, off-white #f4f4fb for light areas, one small accent in warm yellow #f4bf27. Matte colours, soft flat shading, no gradients glow.',
+            '- Even, calm lighting. No lens flares, no neon glow, no light rays, no sparkles, no bokeh, no motion blur.',
+            '- Horizontal 16:9 composition.',
+            '',
+            'Strictly avoid: text, letters, numbers, logos, watermarks, user interface screenshots, rockets, light bulbs, brains, lightning bolts, circuit boards, binary code, glowing padlocks, holograms, robots, humanoid figures, faces, hands.',
+        ]);
     }
 }
