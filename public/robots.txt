@@ -5,4 +5,4 @@ Disallow: /dashboard
 Disallow: /admin
 Disallow: /settings
 
-Sitemap: http://localhost/sitemap.xml
+Sitemap: https://mundofuturo.dev/sitemap.xml
