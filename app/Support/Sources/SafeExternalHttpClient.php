@@ -10,12 +10,16 @@ class SafeExternalHttpClient
 {
     public const int MAX_REDIRECTS = 5;
 
-    public function get(string $url, string $accept): Response
+    public function get(string $url, string $accept, ?string $requiredHost = null): Response
     {
         for ($redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++) {
             UrlSafety::assertAllowed($url);
             $parts = parse_url($url);
             $host = (string) $parts['host'];
+
+            if ($requiredHost !== null && strcasecmp($host, $requiredHost) !== 0) {
+                throw SourceUnavailableException::unreachable('La página redirigió fuera del sitio oficial.');
+            }
             $ip = UrlSafety::resolve($host)[0] ?? null;
             $options = ['allow_redirects' => false];
 
