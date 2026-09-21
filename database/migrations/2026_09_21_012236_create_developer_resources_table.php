@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('developer_resources')) {
+            return;
+        }
+
         Schema::create('developer_resources', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('developer_resource_category_id')->constrained()->restrictOnDelete();
+            $table->foreignId('developer_resource_category_id');
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('external_url')->unique();
@@ -34,12 +38,6 @@ return new class extends Migration
             $table->index(['status', 'published_at']);
             $table->index(['developer_resource_category_id', 'status']);
         });
-
-        Schema::create('developer_resource_developer_resource_technology', function (Blueprint $table) {
-            $table->foreignId('developer_resource_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('developer_resource_technology_id')->constrained()->cascadeOnDelete();
-            $table->primary(['developer_resource_id', 'developer_resource_technology_id']);
-        });
     }
 
     /**
@@ -47,7 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('developer_resource_developer_resource_technology');
         Schema::dropIfExists('developer_resources');
     }
 };
