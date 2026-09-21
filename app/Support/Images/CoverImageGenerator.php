@@ -5,6 +5,7 @@ namespace App\Support\Images;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Image;
 
 /**
@@ -13,6 +14,8 @@ use Laravel\Ai\Image;
  */
 class CoverImageGenerator
 {
+    public const string MODEL = 'gemini-3.1-flash-image';
+
     public const string DISK = 'public';
 
     public const string DIRECTORY = 'covers';
@@ -30,7 +33,7 @@ class CoverImageGenerator
         $image = Image::of($this->buildPrompt($title, $excerpt, $concept))
             ->landscape()
             ->timeout(120)
-            ->generate()
+            ->generate(Lab::Gemini, self::MODEL)
             ->firstImage();
 
         $sourcePath = tempnam(sys_get_temp_dir(), 'cover-ai-');

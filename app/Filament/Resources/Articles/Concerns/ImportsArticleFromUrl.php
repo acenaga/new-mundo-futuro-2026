@@ -21,14 +21,30 @@ trait ImportsArticleFromUrl
             return parent::getSubheading();
         }
 
+        $draft = app(ArticleDraftStore::class)->get($this->pendingDraftKey);
+        $message = $this->pendingDraftMessage($draft['stage'] ?? null);
+
         return new HtmlString(
-            '<span wire:poll.4s="checkPendingDraft" class="fi-ta-text-item inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">'
+            '<span wire:poll.4s="checkPendingDraft" aria-live="polite" class="fi-ta-text-item inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">'
             .'<svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">'
             .'<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>'
             .'<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>'
-            .'Generando borrador desde la URL. Esto puede tardar uno o dos minutos; puedes seguir editando.'
+            .e($message).' Esto puede tardar uno o dos minutos; puedes seguir editando.'
             .'</span>'
         );
+    }
+
+    private function pendingDraftMessage(?string $stage): string
+    {
+        return match ($stage) {
+            'extracting' => 'Descargando y analizando el artículo original.',
+            'generating' => 'Redactando el borrador en español.',
+            'reviewing' => 'Revisando la calidad editorial del borrador.',
+            'importing_images' => 'Importando y optimizando imágenes de la fuente.',
+            'generating_cover' => 'Generando la imagen de portada.',
+            'queued' => 'El borrador está en cola para generarse.',
+            default => 'Generando borrador desde la URL.',
+        };
     }
 
     public function checkPendingDraft(): void
@@ -46,6 +62,17 @@ trait ImportsArticleFromUrl
             Notification::make()
                 ->title('El borrador ya no está disponible')
                 ->body('Caducó o no se pudo recuperar. Vuelve a importar la URL.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        if (($draft['user_id'] ?? null) !== auth()->id()) {
+            $this->pendingDraftKey = null;
+
+            Notification::make()
+                ->title('No tienes acceso a este borrador')
                 ->danger()
                 ->send();
 

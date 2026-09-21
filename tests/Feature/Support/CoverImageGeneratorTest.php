@@ -37,7 +37,8 @@ it('generates a cover with the ai provider and stores it optimised on the public
     Image::assertGenerated(fn ($prompt) => $prompt->contains('A single multi-tool resting on a clean workbench.')
         && $prompt->contains('Flat vector illustration')
         && $prompt->contains('left third of the image must stay completely empty')
-        && $prompt->contains('Strictly avoid: text'));
+        && $prompt->contains('Strictly avoid: text')
+        && $prompt->model === CoverImageGenerator::MODEL);
 });
 
 it('brands the cover with the logo and a wrapped headline in light and dark variants', function () {

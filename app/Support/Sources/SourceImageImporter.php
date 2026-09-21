@@ -3,9 +3,7 @@
 namespace App\Support\Sources;
 
 use App\Support\Images\CoverImageOptimizer;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\File;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
@@ -21,7 +19,10 @@ class SourceImageImporter
 
     public const int MAX_BYTES = 8_000_000;
 
-    public function __construct(private readonly CoverImageOptimizer $optimizer) {}
+    public function __construct(
+        private readonly CoverImageOptimizer $optimizer,
+        private readonly SafeExternalHttpClient $http,
+    ) {}
 
     /**
      * @return string|null Root-relative public URL of the stored image, or null when it could not be imported.
@@ -33,11 +34,8 @@ class SourceImageImporter
         }
 
         try {
-            $response = Http::withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; MundoFuturoBot/1.0)', 'Accept' => 'image/*'])
-                ->timeout(15)
-                ->connectTimeout(5)
-                ->get($url);
-        } catch (ConnectionException) {
+            $response = $this->http->get($url, 'image/*');
+        } catch (SourceUnavailableException) {
             return null;
         }
 
@@ -48,6 +46,10 @@ class SourceImageImporter
         $content = $response->body();
 
         if ($content === '' || strlen($content) > self::MAX_BYTES) {
+            return null;
+        }
+
+        if (@getimagesizefromstring($content) === false) {
             return null;
         }
 

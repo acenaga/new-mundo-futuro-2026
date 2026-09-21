@@ -23,10 +23,10 @@ beforeEach(function () {
 
 it('downloads, optimises and stores an image on the public disk', function () {
     Http::fake([
-        'https://cdn.example.com/*' => Http::response(fakePngBinary(), 200, ['Content-Type' => 'image/png']),
+        'https://example.com/*' => Http::response(fakePngBinary(), 200, ['Content-Type' => 'image/png']),
     ]);
 
-    $url = app(SourceImageImporter::class)->import('https://cdn.example.com/photo.png');
+    $url = app(SourceImageImporter::class)->import('https://example.com/photo.png');
 
     expect($url)->toStartWith('/storage/post-images/')
         ->and($url)->toEndWith('.webp');
@@ -39,10 +39,19 @@ it('downloads, optimises and stores an image on the public disk', function () {
 
 it('returns null when the response is not an image', function () {
     Http::fake([
-        'https://cdn.example.com/*' => Http::response('<html></html>', 200, ['Content-Type' => 'text/html']),
+        'https://example.com/*' => Http::response('<html></html>', 200, ['Content-Type' => 'text/html']),
     ]);
 
-    expect(app(SourceImageImporter::class)->import('https://cdn.example.com/photo.png'))->toBeNull()
+    expect(app(SourceImageImporter::class)->import('https://example.com/photo.png'))->toBeNull()
+        ->and(Storage::disk('public')->files('post-images'))->toBeEmpty();
+});
+
+it('returns null when the image content is invalid despite its declared type', function () {
+    Http::fake([
+        'https://example.com/*' => Http::response('not an image', 200, ['Content-Type' => 'image/png']),
+    ]);
+
+    expect(app(SourceImageImporter::class)->import('https://example.com/photo.png'))->toBeNull()
         ->and(Storage::disk('public')->files('post-images'))->toBeEmpty();
 });
 
@@ -56,8 +65,8 @@ it('returns null for internal hosts without sending a request', function () {
 
 it('returns null when the download fails', function () {
     Http::fake([
-        'https://cdn.example.com/*' => Http::response('', 404),
+        'https://example.com/*' => Http::response('', 404),
     ]);
 
-    expect(app(SourceImageImporter::class)->import('https://cdn.example.com/missing.png'))->toBeNull();
+    expect(app(SourceImageImporter::class)->import('https://example.com/missing.png'))->toBeNull();
 });

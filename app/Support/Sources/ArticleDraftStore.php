@@ -27,6 +27,7 @@ class ArticleDraftStore
 
         $this->put($key, [
             'status' => self::STATUS_PENDING,
+            'stage' => 'queued',
             'url' => $url,
             'user_id' => $userId,
         ]);
@@ -39,6 +40,7 @@ class ArticleDraftStore
         $this->put($key, [
             ...($this->get($key) ?? []),
             'status' => self::STATUS_COMPLETED,
+            'stage' => 'completed',
             'fields' => $draft->fields,
             'warnings' => $draft->warnings,
         ]);
@@ -49,7 +51,18 @@ class ArticleDraftStore
         $this->put($key, [
             ...($this->get($key) ?? []),
             'status' => self::STATUS_FAILED,
+            'stage' => 'failed',
             'error' => $message,
+        ]);
+    }
+
+    /** @param array<string, mixed> $context */
+    public function advance(string $key, string $stage, array $context = []): void
+    {
+        $this->put($key, [
+            ...($this->get($key) ?? []),
+            'stage' => $stage,
+            ...$context,
         ]);
     }
 

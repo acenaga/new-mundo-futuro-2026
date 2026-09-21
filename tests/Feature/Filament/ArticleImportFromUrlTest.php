@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Articles\DraftArticleFromUrl;
+use App\Ai\Agents\ArticleDraftReviewerAgent;
 use App\Ai\Agents\ArticleFromUrlAgent;
 use App\Filament\Resources\Articles\Pages\CreateArticle;
 use App\Jobs\DraftArticleFromUrlJob;
@@ -35,6 +36,15 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 
     Storage::fake('public');
+    ArticleDraftReviewerAgent::fake([[
+        'approved' => true,
+        'reasons' => [],
+        'attribution_verified' => true,
+        'faithful_to_source' => true,
+        'possible_excessive_copying' => false,
+        'unsupported_facts' => [],
+        'html_compliant' => true,
+    ]]);
 
     $paragraphs = str_repeat('<p>Every Laravel starter kit now builds with Vite+, the unified toolchain released in beta.</p>', 6);
 
@@ -48,7 +58,7 @@ beforeEach(function () {
             <meta property="article:published_time" content="2026-08-28T12:50:00-04:00">
         </head><body><article><img src="https://cdn.laravel-news.com/vite-plus.png" alt="Vite+ logo">{$paragraphs}</article></body></html>
         HTML, 200, ['Content-Type' => 'text/html']),
-        'https://down.example.com/*' => Http::response('', 503),
+        'https://example.com/down*' => Http::response('', 503),
     ]);
 });
 
@@ -138,9 +148,29 @@ describe('import action', function () {
 });
 
 describe('draft job', function () {
+    it('blocks a draft rejected by the editorial reviewer', function () {
+        ArticleFromUrlAgent::fake([fakeDraftResponse()]);
+        ArticleDraftReviewerAgent::fake([[
+            'approved' => false,
+            'reasons' => ['Falta contexto verificable.'],
+            'attribution_verified' => true,
+            'faithful_to_source' => false,
+            'possible_excessive_copying' => false,
+            'unsupported_facts' => [],
+            'html_compliant' => true,
+        ]]);
+        Image::fake()->preventStrayImages();
+
+        [, $draft] = runDraftJob(importImages: false, generateCover: false);
+
+        expect($draft['status'])->toBe(ArticleDraftStore::STATUS_FAILED)
+            ->and($draft['error'])->toContain('revisión editorial')
+            ->and($draft['source_hash'])->toBeString();
+    });
+
     it('stores the generated draft with imported images and an ai cover', function () {
         ArticleFromUrlAgent::fake([fakeDraftResponse([
-            'body_html' => '<h2>Qué cambia</h2><p>[[imagen:1]]</p><p>Según informa <a href="https://laravel-news.com/laravel-starter-kits-vite-plus">Laravel News</a>, los kits usan <code>vp</code>.</p><p>[[imagen:7]]</p>',
+            'body_html' => '<h2>Qué cambia</h2><p>[[imagen:1]]</p><p>Según informa <a href="https://laravel-news.com/laravel-starter-kits-vite-plus">Laravel News</a>, los kits usan <code>vp</code>.</p>',
         ])]);
         Image::fake([base64_encode(testPngBinary())]);
 
@@ -167,19 +197,21 @@ describe('draft job', function () {
 
         ArticleFromUrlAgent::assertPrompted(fn ($prompt) => str_contains($prompt->prompt, 'Every Laravel starter kit now builds with Vite+')
             && str_contains($prompt->prompt, 'Paul Redmond')
-            && str_contains($prompt->prompt, 'https://cdn.laravel-news.com/vite-plus.png'));
+            && str_contains($prompt->prompt, 'https://cdn.laravel-news.com/vite-plus.png')
+            && $prompt->model === 'gemini-3.8-flash');
+        ArticleDraftReviewerAgent::assertPrompted(fn ($prompt) => $prompt->model === 'gemini-3.8-flash');
         Image::assertGenerated(fn ($prompt) => $prompt->contains('An open toolbox on a workbench')
             && $prompt->contains('Flat vector illustration'));
     });
 
     it('skips image import and cover generation when disabled', function () {
-        ArticleFromUrlAgent::fake([fakeDraftResponse(['body_html' => '<p>[[imagen:1]]</p><p>Texto sin imágenes.</p>'])]);
+        ArticleFromUrlAgent::fake([fakeDraftResponse(['body_html' => '<p>[[imagen:1]]</p><p>Texto sin imágenes. <a href="https://laravel-news.com/laravel-starter-kits-vite-plus">Fuente</a></p>'])]);
         Image::fake()->preventStrayImages();
 
         [, $draft] = runDraftJob(importImages: false, generateCover: false);
 
         expect($draft['status'])->toBe(ArticleDraftStore::STATUS_COMPLETED)
-            ->and($draft['fields']['body'])->toBe('<p>Texto sin imágenes.</p>')
+            ->and($draft['fields']['body'])->toBe('<p>Texto sin imágenes. <a href="https://laravel-news.com/laravel-starter-kits-vite-plus" target="_blank" rel="noopener noreferrer nofollow">Fuente</a></p>')
             ->and($draft['fields'])->not->toHaveKey('cover_image_path');
 
         Image::assertNothingGenerated();
@@ -201,18 +233,18 @@ describe('draft job', function () {
     it('sanitizes the generated html', function () {
         Image::fake()->preventStrayImages();
         ArticleFromUrlAgent::fake([fakeDraftResponse([
-            'body_html' => '<h1>No</h1><p onclick="x()">Hola <script>alert(1)</script><img src="x.png"><a href="javascript:alert(1)">mal</a></p>',
+            'body_html' => '<h1>No</h1><p onclick="x()">Hola <script>alert(1)</script><img src="x.png"><a href="javascript:alert(1)">mal</a> <a href="https://laravel-news.com/laravel-starter-kits-vite-plus">Fuente</a></p>',
         ])]);
 
         [, $draft] = runDraftJob(importImages: false, generateCover: false);
 
-        expect($draft['fields']['body'])->toBe('<h2>No</h2><p>Hola <a>mal</a></p>');
+        expect($draft['fields']['body'])->toBe('<h2>No</h2><p>Hola <a>mal</a> <a href="https://laravel-news.com/laravel-starter-kits-vite-plus" target="_blank" rel="noopener noreferrer nofollow">Fuente</a></p>');
     });
 
     it('marks the draft as failed when the source cannot be downloaded', function () {
         ArticleFromUrlAgent::fake()->preventStrayPrompts();
 
-        [, $draft] = runDraftJob(url: 'https://down.example.com/post');
+        [, $draft] = runDraftJob(url: 'https://example.com/down');
 
         expect($draft['status'])->toBe(ArticleDraftStore::STATUS_FAILED)
             ->and($draft['error'])->toContain('No se pudo descargar la página');
@@ -222,6 +254,25 @@ describe('draft job', function () {
 });
 
 describe('pending draft polling', function () {
+    it('does not let another user consume a draft', function () {
+        $store = app(ArticleDraftStore::class);
+        $key = $store->start('https://laravel-news.com/x', $this->admin->id);
+        $store->complete($key, new ArticleDraft(['title' => 'Privado', 'slug' => 'privado', 'body' => '<p>Cuerpo</p>']));
+        $otherUser = User::factory()->create();
+        $otherUser->assignRole('admin');
+
+        $this->actingAs($otherUser);
+
+        Livewire::test(CreateArticle::class)
+            ->set('pendingDraftKey', $key)
+            ->call('checkPendingDraft')
+            ->assertSet('pendingDraftKey', null)
+            ->assertNotified('No tienes acceso a este borrador')
+            ->assertFormSet(['title' => null]);
+
+        expect($store->get($key))->not->toBeNull();
+    });
+
     it('fills the form once the draft is completed', function () {
         $store = app(ArticleDraftStore::class);
         $key = $store->start('https://laravel-news.com/laravel-starter-kits-vite-plus', $this->admin->id);
@@ -275,8 +326,19 @@ describe('pending draft polling', function () {
             ->set('pendingDraftKey', $key)
             ->call('checkPendingDraft')
             ->assertSet('pendingDraftKey', $key)
-            ->assertSee('Generando borrador desde la URL')
+            ->assertSee('El borrador está en cola para generarse')
             ->assertFormSet(['title' => null]);
+    });
+
+    it('shows the current generation stage while waiting', function () {
+        $store = app(ArticleDraftStore::class);
+        $key = $store->start('https://laravel-news.com/x', $this->admin->id);
+        $store->advance($key, 'reviewing');
+
+        Livewire::test(CreateArticle::class)
+            ->set('pendingDraftKey', $key)
+            ->assertSee('Revisando la calidad editorial del borrador')
+            ->assertSee('aria-live="polite"', false);
     });
 
     it('notifies the error when the draft failed', function () {

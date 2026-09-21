@@ -6,8 +6,6 @@ use Carbon\CarbonImmutable;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
-use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -26,6 +24,8 @@ class WebArticleExtractor
 
     public const int MAX_IMAGES = 8;
 
+    public function __construct(private readonly SafeExternalHttpClient $http = new SafeExternalHttpClient) {}
+
     /**
      * @var list<string>
      */
@@ -37,19 +37,7 @@ class WebArticleExtractor
 
         UrlSafety::assertAllowed($url);
 
-        try {
-            $response = Http::withHeaders([
-                'User-Agent' => self::USER_AGENT,
-                'Accept' => 'text/html,application/xhtml+xml',
-                'Accept-Language' => 'en,es;q=0.8',
-            ])
-                ->timeout(15)
-                ->connectTimeout(5)
-                ->withOptions(['allow_redirects' => ['max' => 5]])
-                ->get($url);
-        } catch (ConnectionException $exception) {
-            throw SourceUnavailableException::unreachable($exception->getMessage());
-        }
+        $response = $this->http->get($url, 'text/html,application/xhtml+xml');
 
         if ($response->failed()) {
             throw SourceUnavailableException::unreachable('Código de respuesta: '.$response->status().'.');

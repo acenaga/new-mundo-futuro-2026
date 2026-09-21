@@ -37,7 +37,7 @@ class ImportFromUrlAction
                     ->maxLength(2048),
                 Toggle::make('import_images')
                     ->label('Importar las imágenes del artículo original')
-                    ->helperText('Se descargan, optimizan y colocan en el contenido. Verifica que tienes derecho a reutilizarlas.')
+                    ->helperText('Se descargan, validan, optimizan y colocan en el contenido. Una fuente pública no implica permiso de reutilización: verifica tus derechos.')
                     ->default(true),
                 Toggle::make('generate_cover')
                     ->label('Generar imagen de portada con IA')

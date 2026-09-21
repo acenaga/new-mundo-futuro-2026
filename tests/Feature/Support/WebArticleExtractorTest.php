@@ -162,3 +162,21 @@ it('rejects urls with unsupported schemes', function () {
 
     (new WebArticleExtractor)->extract('ftp://example.com/file');
 })->throws(SourceUnavailableException::class, 'La URL no es válida');
+
+it('rejects redirects to internal destinations without requesting them', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'https://example.com/*' => Http::response('', 302, ['Location' => 'http://127.0.0.1/admin']),
+    ]);
+
+    try {
+        (new WebArticleExtractor)->extract('https://example.com/article');
+    } catch (SourceUnavailableException $exception) {
+        expect($exception->getMessage())->toContain('internas o privadas');
+        Http::assertSentCount(1);
+
+        return;
+    }
+
+    $this->fail('Expected SourceUnavailableException to be thrown.');
+});
