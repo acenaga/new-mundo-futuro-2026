@@ -25,6 +25,7 @@
                     ['label' => 'Inicio', 'route' => 'home', 'disabled' => false],
                     ['label' => 'Publicaciones', 'route' => 'publicaciones', 'disabled' => false],
                     ['label' => 'Tutoriales', 'route' => 'tutoriales', 'disabled' => false],
+                    ['label' => 'Recursos', 'route' => 'recursos', 'disabled' => false],
                     ['label' => 'Cursos', 'route' => null, 'disabled' => true],
                     ['label' => 'Comunidad', 'route' => null, 'disabled' => true],
                 ];

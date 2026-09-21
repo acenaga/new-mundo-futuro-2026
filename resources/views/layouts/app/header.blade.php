@@ -19,6 +19,9 @@
                 <flux:navbar.item icon="academic-cap" :href="route('tutoriales')" :current="request()->routeIs('tutoriales*')" wire:navigate>
                     {{ __('Tutoriales') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="rectangle-stack" :href="route('recursos')" :current="request()->routeIs('recursos*')" wire:navigate>
+                    {{ __('Recursos') }}
+                </flux:navbar.item>
             </flux:navbar>
 
             <flux:spacer />
@@ -55,6 +58,9 @@
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="academic-cap" :href="route('tutoriales')" :current="request()->routeIs('tutoriales*')" wire:navigate>
                         {{ __('Tutoriales') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="rectangle-stack" :href="route('recursos')" :current="request()->routeIs('recursos*')" wire:navigate>
+                        {{ __('Recursos') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

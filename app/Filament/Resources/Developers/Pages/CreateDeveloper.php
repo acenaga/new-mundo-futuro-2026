@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Filament\Resources\Developers\Pages;
+
+use App\Filament\Resources\Developers\DeveloperResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateDeveloper extends CreateRecord
+{
+    protected static string $resource = DeveloperResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['user_id'] ??= auth()->id();
+
+        return $data;
+    }
+}

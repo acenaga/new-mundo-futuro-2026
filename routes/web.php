@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DeveloperResourceController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SitemapController;
@@ -11,6 +12,8 @@ Route::get('/publicaciones', [PostController::class, 'index'])->name('publicacio
 Route::get('/publicaciones/{article:slug}', [PostController::class, 'show'])->name('publicaciones.show');
 Route::get('/tutoriales', [TutorialController::class, 'index'])->name('tutoriales');
 Route::get('/tutoriales/{tutorial:slug}', [TutorialController::class, 'show'])->name('tutoriales.show');
+Route::get('/recursos', [DeveloperResourceController::class, 'index'])->name('recursos');
+Route::get('/recursos/{developerResource:slug}', [DeveloperResourceController::class, 'show'])->name('recursos.show');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 

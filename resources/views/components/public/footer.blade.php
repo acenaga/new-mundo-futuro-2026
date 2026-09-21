@@ -20,14 +20,14 @@
             {{-- Links --}}
             <nav aria-label="Footer">
                 <ul class="flex flex-wrap gap-x-6 gap-y-2">
-                    @foreach (['Documentación', 'Changelog', 'Política de Privacidad', 'Contacto'] as $item)
+                    @foreach ([['label' => 'Recursos', 'route' => 'recursos'], ['label' => 'Documentación', 'route' => null], ['label' => 'Changelog', 'route' => null], ['label' => 'Política de Privacidad', 'route' => null], ['label' => 'Contacto', 'route' => null]] as $item)
                         <li>
-                            <a href="#" class="text-xs font-medium uppercase tracking-widest transition-colors"
+                            <a href="{{ $item['route'] ? route($item['route']) : '#' }}" class="text-xs font-medium uppercase tracking-widest transition-colors"
                                 :class="isDark
                                     ?
                                     'text-[#9999b3] hover:text-[#e2e2f0]' :
                                     'text-gray-500 hover:text-gray-900'">
-                                {{ $item }}
+                                {{ $item['label'] }}
                             </a>
                         </li>
                     @endforeach

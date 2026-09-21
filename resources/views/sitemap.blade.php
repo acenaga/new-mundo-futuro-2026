@@ -19,6 +19,12 @@
         <priority>0.9</priority>
     </url>
 
+    <url>
+        <loc>{{ route('recursos') }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
     @foreach ($tutorials as $post)
         <url>
             <loc>{{ route('tutoriales.show', $post) }}</loc>
@@ -32,6 +38,15 @@
         <url>
             <loc>{{ route('publicaciones.show', $post) }}</loc>
             <lastmod>{{ $post->updated_at->toAtomString() }}</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>0.7</priority>
+        </url>
+    @endforeach
+
+    @foreach ($resources as $resource)
+        <url>
+            <loc>{{ route('recursos.show', $resource) }}</loc>
+            <lastmod>{{ $resource->updated_at->toAtomString() }}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.7</priority>
         </url>
