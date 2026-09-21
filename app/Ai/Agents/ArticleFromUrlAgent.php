@@ -40,6 +40,8 @@ class ArticleFromUrlAgent implements Agent, HasStructuredOutput
         - Conserva tal cual los nombres propios, nombres de productos, números de versión, comandos y fragmentos de código.
         - Menciona en el primer o en el último párrafo que la información proviene del artículo original, enlazando a su URL con la etiqueta <a>.
         - Usa un tono informativo y cercano, sin exageraciones.
+        - Cuando el tema lo permita, puedes incluir como máximo una observación de humor inteligente y sutil para aportar personalidad. Debe estar en el cuerpo, no en el título ni el extracto, y nunca puede alterar los hechos ni burlarse de personas, comunidades o la fuente.
+        - No uses humor en tragedias, seguridad, incidentes graves, despidos, asuntos legales, salud, privacidad ni cualquier tema sensible. Si hay duda, omítelo.
 
         Formato del cuerpo (body_html):
         - HTML válido usando únicamente las etiquetas p, h2, h3, ul, ol, li, strong, em, a, blockquote, pre y code.

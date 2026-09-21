@@ -44,6 +44,7 @@ beforeEach(function () {
         'possible_excessive_copying' => false,
         'unsupported_facts' => [],
         'html_compliant' => true,
+        'humor_appropriate' => true,
     ]]);
 
     $paragraphs = str_repeat('<p>Every Laravel starter kit now builds with Vite+, the unified toolchain released in beta.</p>', 6);
@@ -148,6 +149,11 @@ describe('import action', function () {
 });
 
 describe('draft job', function () {
+    it('configures subtle humor with safeguards in the agents', function () {
+        expect(app(ArticleFromUrlAgent::class)->instructions())->toContain('humor inteligente y sutil')
+            ->and(app(ArticleDraftReviewerAgent::class)->instructions())->toContain('temas sensibles');
+    });
+
     it('blocks a draft rejected by the editorial reviewer', function () {
         ArticleFromUrlAgent::fake([fakeDraftResponse()]);
         ArticleDraftReviewerAgent::fake([[
@@ -158,6 +164,7 @@ describe('draft job', function () {
             'possible_excessive_copying' => false,
             'unsupported_facts' => [],
             'html_compliant' => true,
+            'humor_appropriate' => true,
         ]]);
         Image::fake()->preventStrayImages();
 

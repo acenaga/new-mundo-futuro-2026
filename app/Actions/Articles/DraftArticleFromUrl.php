@@ -297,6 +297,7 @@ class DraftArticleFromUrl
             && ($review['faithful_to_source'] ?? false) === true
             && ($review['possible_excessive_copying'] ?? true) === false
             && ($review['html_compliant'] ?? false) === true
+            && ($review['humor_appropriate'] ?? false) === true
             && ($review['unsupported_facts'] ?? []) === [];
 
         if (! $approved) {
