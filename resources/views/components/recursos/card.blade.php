@@ -1,7 +1,7 @@
 @props(['resource'])
 
-<article class="group flex h-full flex-col rounded-2xl border p-5 transition hover:-translate-y-1 hover:shadow-xl"
-    :class="isDark ? 'border-[#3a3a55] bg-[#1b1b25] hover:border-[#f4bf27]/50' : 'border-gray-200 bg-white hover:border-[#110090]/30'">
+<article class="group relative flex h-full flex-col rounded-2xl border p-5 transition hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none focus-within:ring-2 focus-within:ring-[#f4bf27] focus-within:ring-offset-2"
+    :class="isDark ? 'border-[#3a3a55] bg-[#1b1b25] hover:border-[#f4bf27]/50 focus-within:ring-offset-[#1b1b25]' : 'border-gray-200 bg-white hover:border-[#110090]/30 focus-within:ring-offset-white'">
     <div class="flex items-start gap-3">
         <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#110090] font-display text-sm font-bold text-[#f4bf27]">
             @if ($resource->logo_url)
@@ -12,7 +12,9 @@
         </div>
         <div class="min-w-0 flex-1">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#f4bf27]">{{ $resource->category->name }}</p>
-            <h2 class="font-display text-lg font-bold" :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">{{ $resource->name }}</h2>
+            <h3 class="font-display text-lg font-bold" :class="isDark ? 'text-[#e2e2f0]' : 'text-[#12121d]'">
+                <a href="{{ route('recursos.show', $resource) }}" class="after:absolute after:inset-0 focus:outline-none">{{ $resource->name }}</a>
+            </h3>
         </div>
     </div>
 
@@ -30,6 +32,6 @@
 
     <div class="mt-auto flex items-center justify-between gap-3 pt-5 text-xs" :class="isDark ? 'text-[#9999b3]' : 'text-gray-500'">
         <span>Verificado {{ $resource->last_verified_at?->diffForHumans() ?? 'pendiente' }}</span>
-        <a href="{{ route('recursos.show', $resource) }}" class="font-semibold text-[#110090] dark:text-[#c1c1ff]">Ver ficha <span aria-hidden="true">→</span></a>
+        <span class="font-semibold text-[#110090] dark:text-[#c1c1ff]">Ver ficha <span aria-hidden="true">→</span></span>
     </div>
 </article>

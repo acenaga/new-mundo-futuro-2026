@@ -3,6 +3,10 @@
     description="Perspectivas profundas sobre el ecosistema tecnológico, entrevistas con líderes de la industria y análisis de tendencias del desarrollo web."
     :canonical="route('publicaciones')"
 >
+    @php
+        $hasActiveFilters = filled($categorySlug) || filled($tagSlug);
+    @endphp
+
 
     {{-- ═══════════════════════════════════════════════════════════════════
          HEADER
@@ -30,6 +34,10 @@
                     <p class="font-body max-w-md text-sm leading-relaxed text-[#4a4a6a] dark:text-[#9999b3]">
                         Perspectivas profundas sobre el ecosistema tecnológico, entrevistas y análisis de tendencias.
                     </p>
+                    <a href="{{ route('tutoriales') }}"
+                        class="font-display w-fit text-xs font-semibold uppercase tracking-widest text-[#110090] underline-offset-4 transition hover:text-[#4c2e84] hover:underline focus:outline-none focus:ring-2 focus:ring-[#f4bf27] dark:text-[#c1c1ff] dark:hover:text-[#f4bf27]">
+                        Ver tutoriales →
+                    </a>
                 </div>
 
                 {{-- Filters --}}
@@ -93,6 +101,24 @@
                     </div>
                 @endif
 
+                @if ($hasActiveFilters)
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-t pt-5 text-sm border-gray-200/60 dark:border-[#3a3a55]/30">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-display text-xs font-semibold uppercase tracking-widest text-[#4a4a6a] dark:text-[#9999b3]">Filtros activos:</span>
+                            @if ($categorySlug)
+                                <span class="font-body rounded-md bg-white px-2.5 py-1 text-xs text-[#4a4a6a] dark:bg-[#21212d] dark:text-[#9999b3]">{{ $categories->firstWhere('slug', $categorySlug)?->name }}</span>
+                            @endif
+                            @if ($tagSlug)
+                                <span class="font-body rounded-md bg-white px-2.5 py-1 text-xs text-[#4a4a6a] dark:bg-[#21212d] dark:text-[#9999b3]">{{ $tags->firstWhere('slug', $tagSlug)?->name }}</span>
+                            @endif
+                        </div>
+                        <a href="{{ route('publicaciones') }}"
+                            class="font-display text-xs font-semibold uppercase tracking-widest text-[#110090] underline-offset-4 transition hover:text-[#4c2e84] hover:underline focus:outline-none focus:ring-2 focus:ring-[#f4bf27] dark:text-[#c1c1ff] dark:hover:text-[#f4bf27]">
+                            Limpiar filtros
+                        </a>
+                    </div>
+                @endif
+
             </div>
         </div>
     </section>
@@ -107,7 +133,7 @@
             @php $featured = $posts->first(); $rest = $posts->slice(1); @endphp
 
             {{-- ── Featured post ──────────────────────────────────────── --}}
-            <article class="clip-hex-corner relative mb-8 overflow-hidden rounded-xl lg:mb-12 bg-[#eaeaf5] dark:bg-[#1b1b25]">
+            <article class="clip-hex-corner relative mb-8 overflow-hidden rounded-xl bg-[#eaeaf5] transition lg:mb-12 dark:bg-[#1b1b25] focus-within:ring-2 focus-within:ring-[#f4bf27] focus-within:ring-offset-2 focus-within:ring-offset-[#eaeaf5] dark:focus-within:ring-offset-[#1b1b25]">
 
                 <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#c1c1ff]/20 dark:from-[#4c2e84]/10 via-transparent">
                 </div>
@@ -131,7 +157,7 @@
                         </div>
 
                         <h2 class="font-display text-2xl font-bold leading-snug tracking-tight lg:text-3xl xl:text-4xl text-[#12121d] dark:text-[#e2e2f0]">
-                            {{ $featured->title }}
+                            <a href="{{ route('publicaciones.show', $featured) }}" class="after:absolute after:inset-0 focus:outline-none">{{ $featured->title }}</a>
                         </h2>
 
                         @if ($featured->excerpt)
@@ -161,10 +187,9 @@
                                     </p>
                                 </div>
                             </div>
-                            <a href="{{ route('publicaciones.show', $featured) }}"
-                                class="font-display rounded-lg bg-[#f4bf27] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#342600] transition-all hover:brightness-110">
+                            <span class="font-display rounded-lg bg-[#f4bf27] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#342600]">
                                 Leer artículo →
-                            </a>
+                            </span>
                         </div>
                     </div>
 
@@ -189,7 +214,7 @@
             @if ($rest->isNotEmpty())
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($rest as $post)
-                        <article class="group flex flex-col overflow-hidden rounded-xl transition-colors bg-[#eaeaf5] hover:bg-[#e0e0f0] dark:bg-[#1b1b25] dark:hover:bg-[#21212d]">
+                        <article class="group relative flex flex-col overflow-hidden rounded-xl bg-[#eaeaf5] transition-colors hover:bg-[#e0e0f0] dark:bg-[#1b1b25] dark:hover:bg-[#21212d] focus-within:ring-2 focus-within:ring-[#f4bf27] focus-within:ring-offset-2 focus-within:ring-offset-[#eaeaf5] dark:focus-within:ring-offset-[#1b1b25]">
 
                             {{-- Cover --}}
                             <div class="flex aspect-video shrink-0 items-center justify-center overflow-hidden bg-[#e0e0f0] dark:bg-[#21212d]">
@@ -222,7 +247,7 @@
                                 </div>
 
                                 <h3 class="font-display text-base font-bold leading-snug transition-colors group-hover:text-[#f4bf27] text-[#12121d] dark:text-[#e2e2f0]">
-                                    {{ $post->title }}
+                                    <a href="{{ route('publicaciones.show', $post) }}" class="after:absolute after:inset-0 focus:outline-none">{{ $post->title }}</a>
                                 </h3>
 
                                 @if ($post->excerpt)
@@ -250,10 +275,9 @@
                                             {{ $post->published_at?->translatedFormat('d M, Y') ?? '—' }}
                                         </span>
                                     </div>
-                                    <a href="{{ route('publicaciones.show', $post) }}"
-                                        class="font-display text-xs font-semibold transition-colors text-[#110090] hover:text-[#4c2e84] dark:text-[#c1c1ff] dark:hover:text-[#f4bf27]">
+                                    <span class="font-display text-xs font-semibold text-[#110090] dark:text-[#c1c1ff]">
                                         Leer →
-                                    </a>
+                                    </span>
                                 </div>
                             </div>
 

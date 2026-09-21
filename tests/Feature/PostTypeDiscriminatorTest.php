@@ -39,6 +39,15 @@ it('Tutorial global scope only returns tutorials', function () {
     expect($tutorials->first()->type)->toBe(PostType::Tutorial);
 });
 
+it('lists only articles in publicaciones', function () {
+    $article = Post::factory()->published()->create(['title' => 'Artículo del journal']);
+    $tutorial = Post::factory()->tutorial()->published()->create(['title' => 'Tutorial independiente']);
+
+    $this->get(route('publicaciones'))
+        ->assertSee($article->title)
+        ->assertDontSee($tutorial->title);
+});
+
 it('Post::all returns all types', function () {
     Post::factory()->published()->create();
     Post::factory()->tutorial()->published()->create();

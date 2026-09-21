@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\PostStatus;
+use App\Enums\PostType;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
@@ -137,6 +138,10 @@ class PostSeeder extends Seeder
             ],
         ];
 
+        Post::query()
+            ->where('category_id', $tutorialCategory->id)
+            ->update(['type' => PostType::Tutorial]);
+
         foreach ($tutorials as $data) {
             $slug = Str::slug($data['title']);
             $post = Post::updateOrCreate(
@@ -147,16 +152,17 @@ class PostSeeder extends Seeder
                     'title' => $data['title'],
                     'slug' => $slug,
                     'excerpt' => $data['excerpt'],
-                    'body' => $data['excerpt'] . ' ' . str_repeat('Contenido detallado del tutorial. ', 20),
+                    'body' => $data['excerpt'].' '.str_repeat('Contenido detallado del tutorial. ', 20),
                     'cover_image_path' => null,
                     'video_url' => $data['video_url'],
+                    'type' => PostType::Tutorial,
                     'status' => PostStatus::Published,
                     'published_at' => now()->subDays($data['days_ago']),
                     'allow_comments' => true,
                 ]
             );
 
-            $postTags = collect($data['tags'])->map(fn($t) => $tags[$t]->id)->toArray();
+            $postTags = collect($data['tags'])->map(fn ($t) => $tags[$t]->id)->toArray();
             $post->tags()->sync($postTags);
         }
 
@@ -335,7 +341,7 @@ class PostSeeder extends Seeder
                     'title' => $data['title'],
                     'slug' => $slug,
                     'excerpt' => $data['excerpt'],
-                    'body' => $data['excerpt'] . ' ' . str_repeat('Contenido del artículo de publicación. ', 20),
+                    'body' => $data['excerpt'].' '.str_repeat('Contenido del artículo de publicación. ', 20),
                     'cover_image_path' => null,
                     'status' => PostStatus::Published,
                     'published_at' => now()->subDays($data['days_ago']),
@@ -343,7 +349,7 @@ class PostSeeder extends Seeder
                 ]
             );
 
-            $postTags = collect($data['tags'])->map(fn($t) => $tags[$t]->id)->toArray();
+            $postTags = collect($data['tags'])->map(fn ($t) => $tags[$t]->id)->toArray();
             $post->tags()->sync($postTags);
         }
     }
