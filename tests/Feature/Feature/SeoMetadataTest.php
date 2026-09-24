@@ -167,5 +167,23 @@ it('declares sitemap in robots file', function () {
     $robots = file_get_contents(public_path('robots.txt'));
 
     expect($robots)->not->toBeFalse();
-    expect($robots)->toContain('Sitemap: http://localhost/sitemap.xml');
+    expect($robots)->toContain('Sitemap: https://mundofuturo.dev/sitemap.xml');
+});
+
+it('renders noindex and no analytics outside production', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertSee('<meta name="robots" content="noindex">', false);
+    $response->assertDontSee('googletagmanager.com/gtag/js', false);
+});
+
+it('renders analytics and no noindex in production', function () {
+    $this->app['env'] = 'production';
+
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('<meta name="robots" content="noindex">', false);
+    $response->assertSee('googletagmanager.com/gtag/js', false);
 });

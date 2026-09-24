@@ -58,7 +58,7 @@
     href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600|space-grotesk:400,500,600,700|inter:400,500,600"
     rel="stylesheet" />
 
-@if (env('APP_ENV') === 'production')
+@if (app()->isProduction())
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1HTHPRCFMN"></script>
     <script>
