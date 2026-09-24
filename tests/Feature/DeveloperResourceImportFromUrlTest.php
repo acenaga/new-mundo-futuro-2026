@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
@@ -96,8 +97,9 @@ test('a completed draft only fills the generated fields and remains private to i
     foreach (['ViewAny:DeveloperResource', 'Create:DeveloperResource'] as $permission) {
         Permission::findOrCreate($permission, 'web');
     }
-    $owner->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource']);
-    $other->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource']);
+    Role::findOrCreate('editor', 'web');
+    $owner->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource'])->assignRole('editor');
+    $other->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource'])->assignRole('editor');
     $store = app(DeveloperResourceDraftStore::class);
     $key = $store->start('https://example.com', $owner->id);
     $store->complete($key, new DeveloperResourceDraft([
@@ -118,7 +120,8 @@ test('the Filament action queues one private resource draft after validating its
     foreach (['ViewAny:DeveloperResource', 'Create:DeveloperResource'] as $permission) {
         Permission::findOrCreate($permission, 'web');
     }
-    $user->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource']);
+    Role::findOrCreate('editor', 'web');
+    $user->givePermissionTo(['ViewAny:DeveloperResource', 'Create:DeveloperResource'])->assignRole('editor');
     $this->actingAs($user);
     Queue::fake();
 
