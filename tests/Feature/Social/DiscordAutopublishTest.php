@@ -5,7 +5,7 @@ use App\Events\PostPublished;
 use App\Jobs\PublishPostToSocialMedia;
 use App\Models\Post;
 use App\Models\SocialPost;
-use App\Services\Social\DiscordPublisher;
+use App\Services\Social\Publishers\DiscordPublisher;
 use App\Services\Social\SocialPublisherRegistry;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;

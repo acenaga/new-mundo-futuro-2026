@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Social;
+namespace App\Services\Social\Publishers;
 
 use App\Contracts\SocialPublisher;
 use App\Models\Post;

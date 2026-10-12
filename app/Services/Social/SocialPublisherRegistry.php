@@ -3,12 +3,21 @@
 namespace App\Services\Social;
 
 use App\Contracts\SocialPublisher;
+use App\Services\Social\Publishers\DiscordPublisher;
+use App\Services\Social\Publishers\FacebookPagePublisher;
+use App\Services\Social\Publishers\InstagramPublisher;
+use App\Services\Social\Publishers\ThreadsPublisher;
+use App\Services\Social\Publishers\XPublisher;
 use InvalidArgumentException;
 
 class SocialPublisherRegistry
 {
     private const NETWORKS = [
         'discord' => DiscordPublisher::class,
+        'x' => XPublisher::class,
+        'facebook' => FacebookPagePublisher::class,
+        'threads' => ThreadsPublisher::class,
+        'instagram' => InstagramPublisher::class,
     ];
 
     /**
