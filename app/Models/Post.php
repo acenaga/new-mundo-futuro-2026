@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use App\Enums\PostType;
+use App\Events\PostPublished;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Jobs\PublishPostToSocialMedia;
 use App\Support\RichContent\YouTubeEmbed;
 use Database\Factories\PostFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
@@ -17,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
@@ -35,6 +38,8 @@ class Post extends Model implements HasMedia, HasRichContent
      */
     protected static function booted(): void
     {
+        self::$preSaveState ??= new \WeakMap;
+
         static::saving(function (Post $post) {
             $isTutorial = $post instanceof Tutorial || $post->type === PostType::Tutorial;
             $isArticle = $post instanceof Article || $post->type === PostType::Article;
@@ -89,9 +94,32 @@ class Post extends Model implements HasMedia, HasRichContent
                 }
             }
         });
+
+        // Detecta la transición hacia "publicado" para avisar a las integraciones
+        static::saving(static function (Post $post): void {
+            $wasPublished = $post->getOriginal('status') === PostStatus::Published
+                && $post->getOriginal('published_at') !== null
+                && $post->getOriginal('published_at')->lte(now());
+
+            self::$preSaveState[$post] = $wasPublished;
+        });
+
+        static::saved(static function (Post $post): void {
+            $wasPublished = self::$preSaveState[$post] ?? true;
+
+            self::$preSaveState->offsetUnset($post);
+
+            if ($wasPublished || ! $post->isPublished()) {
+                return;
+            }
+
+            PublishPostToSocialMedia::dispatch(new PostPublished($post));
+        });
     }
 
     protected $table = 'posts';
+
+    private static ?\WeakMap $preSaveState = null;
 
     protected $fillable = [
         'user_id',
@@ -172,6 +200,13 @@ class Post extends Model implements HasMedia, HasRichContent
             && $this->published_at->lte(now());
     }
 
+    public function publicUrl(): ?string
+    {
+        return $this->type === PostType::Tutorial
+            ? route('tutoriales.show', ['tutorial' => $this->slug])
+            : route('publicaciones.show', ['article' => $this->slug]);
+    }
+
     public function hasSource(): bool
     {
         return filled($this->source_url);
@@ -245,6 +280,11 @@ class Post extends Model implements HasMedia, HasRichContent
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function socialPosts(): HasMany
+    {
+        return $this->hasMany(SocialPost::class);
     }
 
     public function getMorphClass(): string
