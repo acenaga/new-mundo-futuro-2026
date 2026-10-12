@@ -158,6 +158,8 @@ return [
     'only_youtube_embeds' => 'Solo se permiten iframes de YouTube en el contenido.',
     'youtube_embed_invalid' => 'El identificador de video de YouTube no es válido.',
     'valid_youtube_video' => 'Ingresa una URL válida de YouTube.',
+    'scheduled_must_be_future' => 'La fecha de publicación programada debe ser futura.',
+    'scheduled_half_hour' => 'La publicación solo puede agendarse a horas exactas o y media (:00 o :30).',
 
     'custom' => [
         'attribute-name' => [

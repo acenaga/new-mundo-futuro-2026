@@ -167,6 +167,9 @@ return [
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
 
+    'scheduled_must_be_future' => 'The scheduled publication date must be in the future.',
+    'scheduled_half_hour' => 'Publications can only be scheduled on the hour or half hour (:00 or :30).',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

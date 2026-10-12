@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CourseStatus;
-use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Models\Course;
 use App\Models\Post;
@@ -19,15 +18,17 @@ class HomeController extends Controller
             ->limit(3)
             ->get();
 
-        $popularTutorials = Post::where('type', PostType::Tutorial)
-            ->where('status', PostStatus::Published)
+        $popularTutorials = Post::query()
+            ->where('type', PostType::Tutorial)
+            ->published()
             ->with(['category', 'tags'])
             ->latest('published_at')
             ->limit(3)
             ->get();
 
-        $recentPosts = Post::where('type', PostType::Article)
-            ->where('status', PostStatus::Published)
+        $recentPosts = Post::query()
+            ->where('type', PostType::Article)
+            ->published()
             ->with(['author', 'category', 'tags'])
             ->latest('published_at')
             ->limit(3)

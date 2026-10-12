@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('media:cleanup-orphans')->weekly();
+
+Schedule::command('posts:publish-scheduled')->everyThirtyMinutes();
