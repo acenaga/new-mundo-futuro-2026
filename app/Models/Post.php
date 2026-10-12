@@ -4,17 +4,22 @@ namespace App\Models;
 
 use App\Enums\PostStatus;
 use App\Enums\PostType;
+use App\Events\PostPublished;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
+use App\Jobs\PublishPostToSocialMedia;
 use App\Support\RichContent\YouTubeEmbed;
 use Database\Factories\PostFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
@@ -33,6 +38,8 @@ class Post extends Model implements HasMedia, HasRichContent
      */
     protected static function booted(): void
     {
+        self::$preSaveState ??= new \WeakMap;
+
         static::saving(function (Post $post) {
             $isTutorial = $post instanceof Tutorial || $post->type === PostType::Tutorial;
             $isArticle = $post instanceof Article || $post->type === PostType::Article;
@@ -65,10 +72,54 @@ class Post extends Model implements HasMedia, HasRichContent
                     }
                 }
             }
+
+            // Coherencia estado ↔ fecha: un post publicado nunca queda sin fecha
+            if ($post->status === PostStatus::Published) {
+                $post->published_at ??= now();
+            }
+
+            // Un post programado exige una fecha futura alineada a múltiplos de 30 minutos
+            if ($post->status === PostStatus::Scheduled) {
+                if ($post->published_at === null) {
+                    throw new \InvalidArgumentException('Un post programado requiere una fecha de publicación futura.');
+                }
+
+                if ($post->published_at->lessThanOrEqualTo(now())) {
+                    throw new \InvalidArgumentException('La fecha de publicación programada debe ser futura.');
+                }
+
+                if (! in_array((int) $post->published_at->format('i'), [0, 30], true)
+                    || $post->published_at->format('s') !== '00') {
+                    throw new \InvalidArgumentException('La fecha de publicación solo puede agendarse a horas exactas o y media (:00 o :30).');
+                }
+            }
+        });
+
+        // Detecta la transición hacia "publicado" para avisar a las integraciones
+        static::saving(static function (Post $post): void {
+            $wasPublished = $post->getOriginal('status') === PostStatus::Published
+                && $post->getOriginal('published_at') !== null
+                && $post->getOriginal('published_at')->lte(now());
+
+            self::$preSaveState[$post] = $wasPublished;
+        });
+
+        static::saved(static function (Post $post): void {
+            $wasPublished = self::$preSaveState[$post] ?? true;
+
+            self::$preSaveState->offsetUnset($post);
+
+            if ($wasPublished || ! $post->isPublished()) {
+                return;
+            }
+
+            PublishPostToSocialMedia::dispatch(new PostPublished($post));
         });
     }
 
     protected $table = 'posts';
+
+    private static ?\WeakMap $preSaveState = null;
 
     protected $fillable = [
         'user_id',
@@ -133,6 +184,29 @@ class Post extends Model implements HasMedia, HasRichContent
     /**
      * Determine whether the post is based on an external source.
      */
+    #[Scope]
+    protected function published(Builder $query): Builder
+    {
+        return $query
+            ->where('status', PostStatus::Published)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === PostStatus::Published
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
+    }
+
+    public function publicUrl(): ?string
+    {
+        return $this->type === PostType::Tutorial
+            ? route('tutoriales.show', ['tutorial' => $this->slug])
+            : route('publicaciones.show', ['article' => $this->slug]);
+    }
+
     public function hasSource(): bool
     {
         return filled($this->source_url);
@@ -206,6 +280,11 @@ class Post extends Model implements HasMedia, HasRichContent
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function socialPosts(): HasMany
+    {
+        return $this->hasMany(SocialPost::class);
     }
 
     public function getMorphClass(): string

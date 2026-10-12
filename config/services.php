@@ -35,4 +35,38 @@ return [
         ],
     ],
 
+    'discord' => [
+        'webhook_url' => env('DISCORD_WEBHOOK_URL'),
+    ],
+
+    'x' => [
+        'access_token' => env('X_ACCESS_TOKEN'),
+        'account' => env('X_ACCOUNT'),
+    ],
+
+    'facebook' => [
+        'page_id' => env('FACEBOOK_PAGE_ID'),
+        'page_access_token' => env('FACEBOOK_PAGE_ACCESS_TOKEN'),
+    ],
+
+    'threads' => [
+        'user_id' => env('THREADS_USER_ID'),
+        'access_token' => env('THREADS_ACCESS_TOKEN'),
+    ],
+
+    'instagram' => [
+        'user_id' => env('INSTAGRAM_USER_ID'),
+        'access_token' => env('INSTAGRAM_ACCESS_TOKEN'),
+    ],
+
+    'social' => [
+        'networks' => [
+            'discord',
+            'x',
+            'facebook',
+            'threads',
+            'instagram',
+        ],
+    ],
+
 ];

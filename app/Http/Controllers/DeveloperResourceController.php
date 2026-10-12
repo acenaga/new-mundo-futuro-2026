@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\DeveloperResourcePricing;
-use App\Enums\DeveloperResourceStatus;
 use App\Models\DeveloperResource;
 use App\Models\DeveloperResourceCategory;
 use App\Models\DeveloperResourceTechnology;
@@ -61,10 +60,7 @@ class DeveloperResourceController extends Controller
 
     public function show(DeveloperResource $developerResource): View
     {
-        abort_unless(
-            $developerResource->status === DeveloperResourceStatus::Published && $developerResource->published_at !== null,
-            404,
-        );
+        abort_unless($developerResource->isPublished(), 404);
 
         $developerResource->load(['category', 'technologies', 'author']);
 

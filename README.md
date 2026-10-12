@@ -544,6 +544,146 @@ $response = Ai::provider('kimi')
 
 ---
 
+## Autopublicación en redes sociales
+
+Cada vez que una entrada pasa a **Publicado** (acción manual en Filament, self-heal del modelo o el scheduler `posts:publish-scheduled`), se dispara el evento `PostPublished` y se encola el job `PublishPostToSocialMedia`, que hace fan-out a todas las redes activas en `config/services.php`:
+
+```php
+'social' => [
+    'networks' => ['discord'], // añade 'facebook', 'instagram', 'threads', 'x' cuando existan
+],
+```
+
+El resultado de cada envío se registra en la tabla `social_posts` (único por `post_id + network`) con el ID externo y la URL del mensaje, lo que garantiza idempotencia (nunca se repite una publicación) y permite editar o borrar el contenido externo en el futuro.
+
+### Discord (vía Webhook)
+
+Discord se integra con un **webhook de canal** — gratis, sin bot ni revisión de app.
+
+**1. Crear el webhook en Discord**
+
+1. En tu servidor, entra al canal de anuncios → **Editar canal** → **Integraciones** → **Webhooks** → **Nuevo webhook**.
+2. Nómbralo (ej. "Mundo Futuro") y dale un avatar si quieres.
+3. Copia la URL. Tiene el formato `https://discord.com/api/webhooks/{id}/{token}`.
+
+**2. Configurar la app**
+
+```env
+# .env
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/123456/abc-token
+```
+
+**3. Formato del mensaje**
+
+El publisher envía un **embed** con:
+
+| Campo | Contenido |
+|---|---|
+| `title` | Título del post (limitado a 255) |
+| `description` | `excerpt` o primer extracto del body (limitado a ~3.900 chars) |
+| `url` | URL pública del post (`/publicaciones/{slug}` o `/tutoriales/{slug}`) |
+| `image` | Imagen de portada (`cover_image_path`) si existe |
+| `timestamp` | `published_at` en ISO 8601 |
+
+La petición usa `?wait=true`, por lo que Discord responde con el objeto del mensaje y se guardan `external_id` + URL (`https://discord.com/channels/{guild}/{channel}/{message}`).
+
+**4. Publicación en cola**
+
+Requiere `queue:work` o `schedule:work` corriendo (en producción, el listener de `schedule:run`). Si el job falla, reintenta 3 veces con backoff de 30s y 120s y registra el error en el log/Nightwatch.
+
+**Notas importantes**
+
+- La URL del webhook es una credencial: solo puede publicar en ese canal. Si se filtra, elimínala en Discord y crea otra.
+- Si el canal se borra, el webhook muere con 404 permanente; el job lo reportará y habrá que configurar otro.
+- Si `DISCORD_WEBHOOK_URL` no está configurada, el job termina sin hacer nada (el registro igual se crea vacío).
+- El límite de Discord de 2.000 caracteres aplica al `content`; este integración usa `embed.description` (hasta ~4.000), por lo que el resumen largo no se trunca en un archivo adjunto.
+
+**5. Probar manualmente**
+
+```bash
+# Sin cola: publica inline al guardar un post
+php artisan tinker --execute 'App\Models\Post::factory()->published()->create();'
+
+# Con cola: verifica el job encolado
+php artisan queue:work --once
+```
+
+**Archivos implicados**
+
+| Archivo | Rol |
+|---|---|
+| `app/Models/Post.php` | Detecta la transición a publicado y encola el job |
+| `app/Events/PostPublished.php` | Evento con el post publicado |
+| `app/Jobs/PublishPostToSocialMedia.php` | Fan-out a redes activas con reintentos |
+| `app/Contracts/SocialPublisher.php` | Contrato para integrar una red nueva |
+| `app/Services/Social/SocialPublisherRegistry.php` | Resuelve el publisher por red |
+| `app/Services/Social/Publishers/DiscordPublisher.php` | Envío del embed vía webhook |
+| `app/Models/SocialPost.php` | Registro de mensajes publicados por red |
+| `config/services.php` | Credenciales y lista de redes activas |
+
+**Tests:** `tests/Feature/Social/DiscordAutopublishTest.php`.
+
+### X (Twitter)
+
+X API v2 es **pay-per-use** (créditos en el Developer Console): ~$0.015 por post, **$0.20 si incluye link**.
+
+```env
+X_ACCESS_TOKEN=...     # OAuth 2.0 user token (user context)
+X_ACCOUNT=mundofuturo  # usado para construir la URL del tweet
+```
+
+Formato: `Título — URL del post`, truncado a 280 caracteres (X cuenta el link como 23). El post necesita un token de usuario OAuth 2.0 con scope tweet.write (flujo PKCE). Nota: el link en el cuerpo dispara el recargo de $0.20; si prefieres evitarlo, publica el link en respuesta al tweet (requiere implementación extra).
+
+### Facebook Page
+
+Graph API → `POST /{page-id}/feed` con `link` + `message`. Requiere **app review** de Meta antes de publicar en producción.
+
+```env
+FACEBOOK_PAGE_ID=...
+FACEBOOK_PAGE_ACCESS_TOKEN=...   # token largo-vivo de la página
+```
+
+Formato: extracto del post (decay HTML) + link preview generado por Facebook. Tras publicar se consulta `?fields=permalink_url` para guardar la URL real del post.
+
+### Threads
+
+API oficial de Meta → `POST /{user-id}/threads` con `media_type=TEXT` + `auto_publish_text` (un solo paso). Requiere Tech Provider Verification + app review de Meta (2-4 semanas por permiso) antes de producción.
+
+```env
+THREADS_USER_ID=...
+THREADS_ACCESS_TOKEN=...
+```
+
+Formato: extracto truncado a ~400 chars + `link_attachment` por el primer link del texto. Tras publicar se consulta `?fields=permalink` para guardar la URL.
+
+### Instagram
+
+Requiere **Instagram Business** (cuenta profesional) e **imagen de portada** — los posts sin portada se omiten (sin facturación, registro con ids nulos). Container → publish de dos pasos. Requiere cuenta en el app review de Meta antes de producción.
+
+```env
+INSTAGRAM_USER_ID=...
+INSTAGRAM_ACCESS_TOKEN=...
+```
+
+Formato: caption con extracto truncado a 2.200 chars + URL. La imagen debe estar en una URL pública — se usa la webp de portada de la colección de media del post.
+
+**Notas generales de las 5 redes**
+
+- Redes sin credenciales no publican nada: el job registra filas con ids `null`s (idempotencia evita dobles envíos cuando luego se configuren).
+- El copy corto por red es "título + extracto + URL". La generación de copy específico por red con `laravel/ai` es un enhancement posterior.
+- Antes de producción revisa los requisitos de app review: Discord (libre) ✅ · X (créditos, sin review) · Facebook/Threads/Instagram (app review de Meta).
+
+### Añadir una red nueva
+
+1. Crea una clase que implemente `App\Contracts\SocialPublisher` (método `publish(Post $post): array{external_id, external_url}`).
+2. Regístrala en el mapa de `SocialPublisherRegistry::NETWORKS`.
+3. Añade el nombre a `config('services.social.networks')` y sus credenciales en `config/services.php`.
+4. El resto (detección del evento, cola, idempotencia, tabla) es compartido.
+
+**Tests de redes:** `tests/Feature/Social/DiscordAutopublishTest.php` (Discord) y `tests/Feature/Social/SocialPublishersTest.php` (X, Facebook, Threads, Instagram).
+
+---
+
 ## Convenciones de desarrollo
 
 - **PHP**: PHP 8.4, constructor property promotion, tipos explícitos en todos los métodos.
