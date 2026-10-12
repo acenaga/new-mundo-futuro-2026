@@ -617,11 +617,61 @@ php artisan queue:work --once
 | `app/Jobs/PublishPostToSocialMedia.php` | Fan-out a redes activas con reintentos |
 | `app/Contracts/SocialPublisher.php` | Contrato para integrar una red nueva |
 | `app/Services/Social/SocialPublisherRegistry.php` | Resuelve el publisher por red |
-| `app/Services/Social/DiscordPublisher.php` | Envío del embed vía webhook |
+| `app/Services/Social/Publishers/DiscordPublisher.php` | Envío del embed vía webhook |
 | `app/Models/SocialPost.php` | Registro de mensajes publicados por red |
-| `config/services.php` | `DISCORD_WEBHOOK_URL` y lista de redes activas |
+| `config/services.php` | Credenciales y lista de redes activas |
 
 **Tests:** `tests/Feature/Social/DiscordAutopublishTest.php`.
+
+### X (Twitter)
+
+X API v2 es **pay-per-use** (créditos en el Developer Console): ~$0.015 por post, **$0.20 si incluye link**.
+
+```env
+X_ACCESS_TOKEN=...     # OAuth 2.0 user token (user context)
+X_ACCOUNT=mundofuturo  # usado para construir la URL del tweet
+```
+
+Formato: `Título — URL del post`, truncado a 280 caracteres (X cuenta el link como 23). El post necesita un token de usuario OAuth 2.0 con scope tweet.write (flujo PKCE). Nota: el link en el cuerpo dispara el recargo de $0.20; si prefieres evitarlo, publica el link en respuesta al tweet (requiere implementación extra).
+
+### Facebook Page
+
+Graph API → `POST /{page-id}/feed` con `link` + `message`. Requiere **app review** de Meta antes de publicar en producción.
+
+```env
+FACEBOOK_PAGE_ID=...
+FACEBOOK_PAGE_ACCESS_TOKEN=...   # token largo-vivo de la página
+```
+
+Formato: extracto del post (decay HTML) + link preview generado por Facebook. Tras publicar se consulta `?fields=permalink_url` para guardar la URL real del post.
+
+### Threads
+
+API oficial de Meta → `POST /{user-id}/threads` con `media_type=TEXT` + `auto_publish_text` (un solo paso). Requiere Tech Provider Verification + app review de Meta (2-4 semanas por permiso) antes de producción.
+
+```env
+THREADS_USER_ID=...
+THREADS_ACCESS_TOKEN=...
+```
+
+Formato: extracto truncado a ~400 chars + `link_attachment` por el primer link del texto. Tras publicar se consulta `?fields=permalink` para guardar la URL.
+
+### Instagram
+
+Requiere **Instagram Business** (cuenta profesional) e **imagen de portada** — los posts sin portada se omiten (sin facturación, registro con ids nulos). Container → publish de dos pasos. Requiere cuenta en el app review de Meta antes de producción.
+
+```env
+INSTAGRAM_USER_ID=...
+INSTAGRAM_ACCESS_TOKEN=...
+```
+
+Formato: caption con extracto truncado a 2.200 chars + URL. La imagen debe estar en una URL pública — se usa la webp de portada de la colección de media del post.
+
+**Notas generales de las 5 redes**
+
+- Redes sin credenciales no publican nada: el job registra filas con ids `null`s (idempotencia evita dobles envíos cuando luego se configuren).
+- El copy corto por red es "título + extracto + URL". La generación de copy específico por red con `laravel/ai` es un enhancement posterior.
+- Antes de producción revisa los requisitos de app review: Discord (libre) ✅ · X (créditos, sin review) · Facebook/Threads/Instagram (app review de Meta).
 
 ### Añadir una red nueva
 
@@ -629,6 +679,8 @@ php artisan queue:work --once
 2. Regístrala en el mapa de `SocialPublisherRegistry::NETWORKS`.
 3. Añade el nombre a `config('services.social.networks')` y sus credenciales en `config/services.php`.
 4. El resto (detección del evento, cola, idempotencia, tabla) es compartido.
+
+**Tests de redes:** `tests/Feature/Social/DiscordAutopublishTest.php` (Discord) y `tests/Feature/Social/SocialPublishersTest.php` (X, Facebook, Threads, Instagram).
 
 ---
 
