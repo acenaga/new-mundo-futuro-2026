@@ -5,6 +5,7 @@ namespace App\Enums;
 enum PostStatus: string
 {
     case Draft = 'draft';
+    case Scheduled = 'scheduled';
     case Published = 'published';
     case Archived = 'archived';
 
@@ -12,6 +13,7 @@ enum PostStatus: string
     {
         return match ($this) {
             self::Draft => 'Borrador',
+            self::Scheduled => 'Programado',
             self::Published => 'Publicado',
             self::Archived => 'Archivado',
         };
@@ -21,6 +23,7 @@ enum PostStatus: string
     {
         return match ($this) {
             self::Draft => 'gray',
+            self::Scheduled => 'info',
             self::Published => 'success',
             self::Archived => 'warning',
         };

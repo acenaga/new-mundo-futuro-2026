@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Models\DeveloperResource;
 use App\Models\Post;
@@ -12,7 +11,7 @@ class SitemapController extends Controller
 {
     public function index(): Response
     {
-        $posts = Post::where('status', PostStatus::Published)
+        $posts = Post::published()
             ->latest('published_at')
             ->get(['id', 'slug', 'type', 'published_at', 'updated_at']);
 

@@ -7,6 +7,7 @@ use App\Filament\Forms\Components\CoverImageUpload;
 use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Models\Category;
 use App\Rules\OnlyYouTubeEmbeds;
+use App\Rules\ScheduledAtHalfHour;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -14,6 +15,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
@@ -108,10 +110,25 @@ class TutorialForm
                             ->label('Estado')
                             ->options(PostStatus::class)
                             ->default(PostStatus::Draft)
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, Get $get, $state): void {
+                                if ($state === PostStatus::Published->value && blank($get('published_at'))) {
+                                    $set('published_at', now()->format('Y-m-d H:i:s'));
+                                }
+
+                                if ($state === PostStatus::Scheduled->value) {
+                                    $set('published_at', ScheduledAtHalfHour::nextSlot()->format('Y-m-d H:i:s'));
+                                }
+                            }),
                         DateTimePicker::make('published_at')
                             ->label('Fecha de publicación')
-                            ->nullable(),
+                            ->minutesStep(30)
+                            ->maxDate(fn (Get $get) => $get('status') === PostStatus::Scheduled->value ? null : now())
+                            ->required(fn (Get $get): bool => in_array($get('status'), [PostStatus::Published->value, PostStatus::Scheduled->value], true))
+                            ->rules(fn (Get $get): array => $get('status') === PostStatus::Scheduled->value
+                                ? [new ScheduledAtHalfHour]
+                                : []),
                         Select::make('tags')
                             ->label('Etiquetas')
                             ->relationship('tags', 'name')

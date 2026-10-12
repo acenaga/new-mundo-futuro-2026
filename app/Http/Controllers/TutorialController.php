@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Models\Tag;
 use App\Models\Tutorial;
@@ -15,7 +14,7 @@ class TutorialController extends Controller
     {
         $tagSlug = $request->query('tag');
 
-        $query = Tutorial::where('status', PostStatus::Published)
+        $query = Tutorial::published()
             ->with(['tags'])
             ->latest('published_at');
 
@@ -28,7 +27,7 @@ class TutorialController extends Controller
         $tags = Tag::whereHas(
             'posts',
             fn ($q) => $q
-                ->where('status', PostStatus::Published)
+                ->published()
                 ->where('type', PostType::Tutorial)
         )->orderBy('name')->get();
 
@@ -39,10 +38,11 @@ class TutorialController extends Controller
     {
         $tutorial->loadMissing(['author', 'category', 'tags']);
 
-        abort_unless($tutorial->status === PostStatus::Published, 404);
+        abort_unless($tutorial->isPublished(), 404);
 
-        $related = Tutorial::where('id', '!=', $tutorial->id)
-            ->where('status', PostStatus::Published)
+        $related = Tutorial::query()
+            ->where('id', '!=', $tutorial->id)
+            ->published()
             ->with(['tags'])
             ->latest('published_at')
             ->limit(3)

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tutorials\Tables;
 
 use App\Enums\PostStatus;
+use App\Filament\Actions\PostPublishActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -64,6 +65,7 @@ class TutorialsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                ...PostPublishActions::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

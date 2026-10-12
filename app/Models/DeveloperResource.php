@@ -43,7 +43,17 @@ class DeveloperResource extends Model
     #[Scope]
     protected function published(Builder $query): Builder
     {
-        return $query->where('status', DeveloperResourceStatus::Published)->whereNotNull('published_at');
+        return $query
+            ->where('status', DeveloperResourceStatus::Published)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === DeveloperResourceStatus::Published
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
     }
 
     #[Scope]

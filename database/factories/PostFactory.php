@@ -7,6 +7,7 @@ use App\Enums\PostType;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use App\Rules\ScheduledAtHalfHour;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -39,6 +40,15 @@ class PostFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => PostStatus::Published,
             'published_at' => now(),
+        ]);
+    }
+
+    public function scheduled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => PostStatus::Scheduled,
+            'published_at' => ScheduledAtHalfHour::nextSlot()->addDay(),
+            'allow_comments' => true,
         ]);
     }
 

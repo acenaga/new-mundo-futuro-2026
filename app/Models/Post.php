@@ -10,6 +10,8 @@ use Database\Factories\PostFactory;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -63,6 +65,27 @@ class Post extends Model implements HasMedia, HasRichContent
                     if ($tutorialCategory && (int) $post->category_id === (int) $tutorialCategory->id) {
                         throw new \InvalidArgumentException('Un artículo no puede tener la categoría "Tutoriales".');
                     }
+                }
+            }
+
+            // Coherencia estado ↔ fecha: un post publicado nunca queda sin fecha
+            if ($post->status === PostStatus::Published) {
+                $post->published_at ??= now();
+            }
+
+            // Un post programado exige una fecha futura alineada a múltiplos de 30 minutos
+            if ($post->status === PostStatus::Scheduled) {
+                if ($post->published_at === null) {
+                    throw new \InvalidArgumentException('Un post programado requiere una fecha de publicación futura.');
+                }
+
+                if ($post->published_at->lessThanOrEqualTo(now())) {
+                    throw new \InvalidArgumentException('La fecha de publicación programada debe ser futura.');
+                }
+
+                if (! in_array((int) $post->published_at->format('i'), [0, 30], true)
+                    || $post->published_at->format('s') !== '00') {
+                    throw new \InvalidArgumentException('La fecha de publicación solo puede agendarse a horas exactas o y media (:00 o :30).');
                 }
             }
         });
@@ -133,6 +156,22 @@ class Post extends Model implements HasMedia, HasRichContent
     /**
      * Determine whether the post is based on an external source.
      */
+    #[Scope]
+    protected function published(Builder $query): Builder
+    {
+        return $query
+            ->where('status', PostStatus::Published)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === PostStatus::Published
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
+    }
+
     public function hasSource(): bool
     {
         return filled($this->source_url);

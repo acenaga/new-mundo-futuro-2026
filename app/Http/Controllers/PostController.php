@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PostStatus;
 use App\Enums\PostType;
 use App\Models\Article;
 use App\Models\Category;
@@ -17,7 +16,7 @@ class PostController extends Controller
         $categorySlug = $request->query('categoria');
         $tagSlug = $request->query('tag');
 
-        $query = Article::where('status', PostStatus::Published)
+        $query = Article::published()
             ->with(['author', 'category', 'tags'])
             ->latest('published_at');
 
@@ -38,7 +37,7 @@ class PostController extends Controller
         $tags = Tag::whereHas(
             'posts',
             fn ($q) => $q
-                ->where('status', PostStatus::Published)
+                ->published()
                 ->where('type', PostType::Article)
         )->orderBy('name')->get();
 
@@ -47,13 +46,14 @@ class PostController extends Controller
 
     public function show(Article $article): View
     {
-        abort_unless($article->status === PostStatus::Published, 404);
+        abort_unless($article->isPublished(), 404);
 
         $article->load(['author', 'category', 'tags']);
 
-        $related = Article::where('category_id', $article->category_id)
+        $related = Article::query()
+            ->where('category_id', $article->category_id)
             ->where('id', '!=', $article->id)
-            ->where('status', PostStatus::Published)
+            ->published()
             ->with(['author', 'category', 'tags'])
             ->latest('published_at')
             ->limit(3)
