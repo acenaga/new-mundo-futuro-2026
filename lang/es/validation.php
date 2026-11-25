@@ -160,6 +160,7 @@ return [
     'valid_youtube_video' => 'Ingresa una URL válida de YouTube.',
     'scheduled_must_be_future' => 'La fecha de publicación programada debe ser futura.',
     'scheduled_half_hour' => 'La publicación solo puede agendarse a horas exactas o y media (:00 o :30).',
+    'slug_format' => 'El campo :attribute solo puede contener minúsculas, números y guiones, sin guiones consecutivos ni al inicio o al final.',
 
     'custom' => [
         'attribute-name' => [

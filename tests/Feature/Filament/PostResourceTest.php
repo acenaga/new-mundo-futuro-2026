@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 beforeEach(function () {
     app(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -283,3 +284,126 @@ test('cover image is optimised and stored as webp when creating an article', fun
     [$width] = getimagesize(Storage::disk('public')->path($article->cover_image_path));
     expect($width)->toBe(CoverImageOptimizer::MAX_WIDTH);
 });
+
+test('article slug is generated from the title', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateArticle::class)
+        ->fillForm(['title' => 'Nuevo artículo de Laravel'])
+        ->assertFormSet(['slug' => 'nuevo-articulo-de-laravel']);
+});
+
+test('admin cannot create an article with invalid slug format', function (string $slug) {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateArticle::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Article With Invalid Slug',
+            'slug' => $slug,
+            'body' => '<p>Contenido</p>',
+            'status' => PostStatus::Draft,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['slug'])
+        ->assertSee(__('validation.slug_format', ['attribute' => 'slug']));
+
+    assertDatabaseMissing(Post::class, ['slug' => $slug]);
+})->with([
+    'slash' => 'foo/bar',
+    'spaces' => 'foo bar',
+    'uppercase' => 'Foo-Bar',
+    'underscore' => 'foo_bar',
+]);
+
+test('admin cannot create a tutorial with invalid slug format', function (string $slug) {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateTutorial::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Tutorial With Invalid Slug',
+            'slug' => $slug,
+            'body' => '<p>Contenido</p>',
+            'status' => PostStatus::Draft,
+            'category_id' => $tutorialCategory->id,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['slug'])
+        ->assertSee(__('validation.slug_format', ['attribute' => 'slug']));
+
+    assertDatabaseMissing(Post::class, ['slug' => $slug]);
+})->with([
+    'slash' => 'foo/bar',
+    'spaces' => 'foo bar',
+    'uppercase' => 'Foo-Bar',
+    'underscore' => 'foo_bar',
+]);
+
+test('article and tutorial slugs share the same uniqueness constraint', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    Article::factory()->create(['slug' => 'slug-compartido']);
+    $tutorialCategory = Category::firstOrCreate(['slug' => 'tutoriales'], ['name' => 'Tutoriales']);
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateTutorial::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Tutorial With Duplicated Slug',
+            'slug' => 'slug-compartido',
+            'body' => '<p>Contenido</p>',
+            'status' => PostStatus::Draft,
+            'category_id' => $tutorialCategory->id,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['slug' => 'unique']);
+
+    assertDatabaseMissing(Post::class, ['title' => 'Tutorial With Duplicated Slug']);
+});
+
+test('cover image rejects a tampered existing path when creating an article', function () {
+    Storage::fake('public');
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $this->actingAs($admin);
+
+    Livewire::test(CreateArticle::class)
+        ->fillForm([
+            'user_id' => $admin->id,
+            'title' => 'Article With Tampered Cover',
+            'slug' => 'article-with-tampered-cover',
+            'body' => '<p>Contenido</p>',
+            'status' => PostStatus::Draft,
+            'cover_image_path' => ['tampered-path' => 'covers/another-users-image.webp'],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['cover_image_path']);
+
+    assertDatabaseMissing(Post::class, ['title' => 'Article With Tampered Cover']);
+});
+
+test('user without create permission cannot open post creation pages', function (string $page) {
+    $editor = User::factory()->create();
+    $editor->assignRole('editor');
+
+    $this->actingAs($editor);
+
+    Livewire::test($page)->assertForbidden();
+})->with([
+    'articles' => CreateArticle::class,
+    'tutorials' => CreateTutorial::class,
+]);

@@ -25,6 +25,7 @@ class CoverImageUpload extends FileUpload
 
         $this
             ->image()
+            ->preventFilePathTampering()
             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
             ->maxSize(5120)
             ->disk('public')
