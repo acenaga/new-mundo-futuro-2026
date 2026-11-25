@@ -169,6 +169,7 @@ return [
 
     'scheduled_must_be_future' => 'The scheduled publication date must be in the future.',
     'scheduled_half_hour' => 'Publications can only be scheduled on the hour or half hour (:00 or :30).',
+    'slug_format' => 'The :attribute field may only contain lowercase letters, numbers, and dashes, without consecutive, leading, or trailing dashes.',
 
     /*
     |--------------------------------------------------------------------------

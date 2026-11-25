@@ -8,6 +8,7 @@ use App\Filament\RichEditor\Plugins\YouTubeEmbedRichContentPlugin;
 use App\Models\Category;
 use App\Rules\OnlyYouTubeEmbeds;
 use App\Rules\ScheduledAtHalfHour;
+use App\Rules\Slug;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -42,7 +43,8 @@ class TutorialForm
                             ->disabled()
                             ->dehydrated()
                             ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rule(new Slug),
                         Textarea::make('excerpt')
                             ->label('Extracto')
                             ->rows(3)

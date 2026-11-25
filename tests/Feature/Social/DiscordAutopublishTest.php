@@ -11,6 +11,17 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
+it('marks the social publication job to run after database commit', function () {
+    Queue::fake();
+
+    Post::factory()->published()->create();
+
+    Queue::assertPushed(
+        PublishPostToSocialMedia::class,
+        fn (PublishPostToSocialMedia $job): bool => $job->afterCommit === true,
+    );
+});
+
 it('dispatches the job when a post transitions to published', function () {
     Queue::fake();
 

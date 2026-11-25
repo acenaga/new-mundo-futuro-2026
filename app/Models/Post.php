@@ -113,7 +113,7 @@ class Post extends Model implements HasMedia, HasRichContent
                 return;
             }
 
-            PublishPostToSocialMedia::dispatch(new PostPublished($post));
+            PublishPostToSocialMedia::dispatch(new PostPublished($post))->afterCommit();
         });
     }
 
